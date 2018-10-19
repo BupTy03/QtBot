@@ -6,7 +6,7 @@ AddTaskWindow::AddTaskWindow(QWidget *parent) :
     ui(new Ui::AddTaskWindow)
 {
     ui->setupUi(this);
-    this->setWindowTitle("Добавление задачи");
+    this->setWindowTitle(tr("Добавление задачи"));
 
     ui->intervalSpinBox->setMaximum(999);
     ui->periodSpinBox->setMaximum(3600);

@@ -4,12 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network xml webenginewidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = QtBot
 TEMPLATE = app
+
+CONFIG += console
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -26,15 +28,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    addtaskwindow.cpp
+    addtaskwindow.cpp \
+    logintovk.cpp \
+    logindialog.cpp
 
 HEADERS += \
         mainwindow.h \
-    addtaskwindow.h
+    addtaskwindow.h \
+    logintovk.h \
+    logindialog.h
 
 FORMS += \
         mainwindow.ui \
-    addtaskwindow.ui
+    addtaskwindow.ui \
+    logindialog.ui
 
 RESOURCES += \
     resouces.qrc
