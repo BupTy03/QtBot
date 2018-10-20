@@ -4,12 +4,15 @@
 #include <QWebEngineView>
 #include <QUrlQuery>
 #include <QPair>
+#include <QRegExp>
+#include <QDebug>
 
 class LoginToVk : public QWebEngineView
 {
 	Q_OBJECT
 private:
     QString app_id;
+    QPair<QString, QString> user_info;
 
 public:
     LoginToVk(const QString& app_id, QWidget* parent = nullptr);

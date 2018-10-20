@@ -30,13 +30,15 @@ SOURCES += \
         mainwindow.cpp \
     addtaskwindow.cpp \
     logintovk.cpp \
-    logindialog.cpp
+    logindialog.cpp \
+    myvk.cpp
 
 HEADERS += \
         mainwindow.h \
     addtaskwindow.h \
     logintovk.h \
-    logindialog.h
+    logindialog.h \
+    myvk.h
 
 FORMS += \
         mainwindow.ui \

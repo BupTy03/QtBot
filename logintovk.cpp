@@ -1,8 +1,5 @@
 #include "logintovk.h"
 
-#include <iostream>
-#include <QRegExp>
-
 LoginToVk::LoginToVk(const QString& appId, QWidget* parent) : QWebEngineView (parent), app_id(appId)
 {
     QObject::connect(this, SIGNAL(urlChanged(const QUrl&)), SLOT(userLogged(const QUrl&)));
@@ -16,27 +13,27 @@ void LoginToVk::loadLogin()
     query.addQueryItem("client_id", app_id);
     query.addQueryItem("display", "popup");
     query.addQueryItem("redirect_uri", "https://oauth.vk.com/blank.html");
-    query.addQueryItem("scope", "266240"); //331776   266240
+    query.addQueryItem("scope", "331776"); //331776   266240
     query.addQueryItem("response_type", "token");
     query.addQueryItem("v", "5.52");
 
 
-    std::cout << "Query:" << (query.toString()).toStdString() << std::endl;
+    qDebug() << "Query:" << query.toString();
     url.setQuery(query);
-    std::cout << "Url:" << (url.toString()).toStdString() << std::endl;
+    qDebug() << "Url:" << url.toString();
     load(url);
 }
 
 void LoginToVk::userLogged(const QUrl& url)
 {
-    std::cout << "Response URL: " << (url.toString()).toStdString() << std::endl;
-    std::cout << "Fragment: " << (url.fragment()).toStdString() << std::endl;
+    qDebug() << "Response URL: " << url.toString();
+    qDebug() << "Fragment: " << url.fragment();
 
     QRegExp regExp("^access_token=([^&]+)&expires_in=\\d+&user_id=(\\d+)$");
     if(regExp.exactMatch((url.fragment())))
     {
-        std::cout << (regExp.cap(1)).toStdString() << std::endl;
-        std::cout << (regExp.cap(2)).toStdString() << std::endl;
+        qDebug() << regExp.cap(1);
+        qDebug() << regExp.cap(2);
         emit userIsLogged(qMakePair(regExp.cap(1), regExp.cap(2)));
     }
 }

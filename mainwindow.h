@@ -8,6 +8,7 @@
 #include "addtaskwindow.h"
 #include "logintovk.h"
 #include "logindialog.h"
+#include "myvk.h"
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +32,7 @@ private:
     Ui::MainWindow *ui;
     const QString app_id = "6667132";
     QPair<QString, QString> user_info;
+    MyVK* myVK;
     //LoginToVk* login2vk;
 };
 
