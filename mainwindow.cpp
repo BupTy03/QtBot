@@ -54,7 +54,7 @@ void MainWindow::on_LoginAction_triggered()
 
    //MyVK vk(user_info.second, user_info.first);
    myVK = new MyVK(user_info.second, user_info.first, this);
-   myVK->sendMsgToUser("117683074", "Hi there! I'm QtBot and I cost much more than 2 rubles!");    //DenisId: 117683074
+   myVK->sendMsgToUser(user_info.second, "Hi there! I'm QtBot and I cost much more than 2 rubles!");
 
    connect(ui->NewTaskBtn, SIGNAL(released()), ui->NewTaskAction, SLOT(trigger()));
 
