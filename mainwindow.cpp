@@ -45,23 +45,41 @@ void MainWindow::on_LoginAction_triggered()
 {
    LoginDialog logDial(app_id);
    logDial.exec();
-   this->user_info = logDial.getInfo();
+
+   QPair<QString, QString> user_info = logDial.getInfo();
    if(user_info.first.isEmpty() || user_info.second.isEmpty())
    {
         QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось войти ¯\\_(ツ)_/¯"));
         return;
    }
 
-   //MyVK vk(user_info.second, user_info.first);
-   myVK = new MyVK(user_info.second, user_info.first, this);
-   myVK->sendMsgToUser(user_info.second, "Hi there! I'm QtBot and I cost much more than 2 rubles!");
+   myVK = new MyVK(user_info.first, user_info.second, this);
+   //myVK->sendMsgToUserQuery(user_info.first, "Hi there! I'm QtBot and I cost much more than 2 rubles!");
 
-   connect(ui->NewTaskBtn, SIGNAL(released()), ui->NewTaskAction, SLOT(trigger()));
+   connect(myVK, SIGNAL(signalGroupsLoaded()), this, SLOT(slotGroupsLoaded()));
+   myVK->getGroupsQuery(user_info.first);
 
-   ui->LoginBtn->hide();
-   ui->NewTaskBtn->show();
-   ui->LoginAction->setDisabled(true);
-   ui->NewTaskAction->setEnabled(true);
+   ui->statusBar->showMessage(QString("\tUser_id: ") + user_info.first + QString("Access_token: ") + user_info.second);
+}
 
-   ui->statusBar->showMessage(QString("Access_token: ") + user_info.first + QString("\tUser_id: ") + user_info.second);
+void MainWindow::slotGroupsLoaded()
+{
+    if((myVK->getGroupsResponse()).empty())
+    {
+        QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось загрузить список сообществ :("));
+        return;
+    }
+
+    connect(ui->NewTaskBtn, SIGNAL(released()), ui->NewTaskAction, SLOT(trigger()));
+
+    ui->LoginBtn->hide();
+    ui->NewTaskBtn->show();
+    ui->LoginAction->setDisabled(true);
+    ui->NewTaskAction->setEnabled(true);
+
+//    for(const auto& p : myVK->getGroupsResponse())
+//    {
+//        qDebug() << "Id of Group: " << p.first;
+//        qDebug() << "Name of Group: " << p.second;
+//    }
 }

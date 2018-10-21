@@ -34,6 +34,6 @@ void LoginToVk::userLogged(const QUrl& url)
     {
         qDebug() << regExp.cap(1);
         qDebug() << regExp.cap(2);
-        emit userIsLogged(qMakePair(regExp.cap(1), regExp.cap(2)));
+        emit userIsLogged(qMakePair(regExp.cap(2), regExp.cap(1)));
     }
 }

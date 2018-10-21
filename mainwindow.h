@@ -28,12 +28,12 @@ private slots:
 
     void on_LoginAction_triggered();
 
+    void slotGroupsLoaded();
+
 private:
-    Ui::MainWindow *ui;
-    const QString app_id = "6667132";
-    QPair<QString, QString> user_info;
-    MyVK* myVK;
-    //LoginToVk* login2vk;
+    Ui::MainWindow *ui{nullptr};
+    const QString app_id{"6667132"};
+    MyVK* myVK{nullptr};
 };
 
 #endif // MAINWINDOW_H
