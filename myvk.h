@@ -17,21 +17,21 @@ class MyVK : public QObject
 {
     Q_OBJECT
 public:
-    MyVK(const QString& user_id, const QString& access_token, QObject* parent = nullptr);
+    explicit MyVK(const QString& user_id, const QString& access_token, QObject* parent = nullptr);
 
-    QString getUserID();
-    QString getAccessToken();
+    const QString& getUserID();
+    const QString& getAccessToken();
 
     void sendMsgToUserQuery(const QString& userId, const QString& text);
     void sendMsgToGroupQuery(const QString& groupId, const QString& text);
     void getGroupsQuery(const QString& userId);
 
-    const std::vector<std::pair<QString, QString>>& getGroupsResponse();
+    const QVector<QPair<QString, QString>>& getGroupsResponse();
 
 private:
     QString user_id;
     QString access_token;
-    std::vector<std::pair<QString, QString>> groupsResponse;
+    QVector<QPair<QString, QString>> groupsResponse;
 
 signals:
     void signalGroupsLoaded();

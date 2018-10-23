@@ -29,13 +29,21 @@ void MainWindow::on_ExitAction_triggered()
 
 void MainWindow::on_NewTaskAction_triggered()
 {
-    AddTaskWindow addTskWin;
+    AddTaskWindow addTskWin(myVK->getGroupsResponse());
     addTskWin.setModal(true);
 
     if(!addTskWin.exec())
     {
         return;
     }
+
+    qDebug() << "====================Chosen groups======================";
+    for(auto indx : addTskWin.getGroupsIndexesSet())
+    {
+        qDebug() << "Id of group: " << ((myVK->getGroupsResponse()).at(indx)).first;
+        qDebug() << "Name of group: " << ((myVK->getGroupsResponse()).at(indx)).second << '\n';
+    }
+    qDebug() << "=================End of chosen groups==================";
 
     ui->statusBar->showMessage(QString("Interval: ") + QString::number(addTskWin.getInterval()) +
                                QString("\tPeriod: ") + QString::number(addTskWin.getPeriod()));

@@ -31,14 +31,16 @@ SOURCES += \
     addtaskwindow.cpp \
     logintovk.cpp \
     logindialog.cpp \
-    myvk.cpp
+    myvk.cpp \
+    groupschoicemodel.cpp
 
 HEADERS += \
         mainwindow.h \
     addtaskwindow.h \
     logintovk.h \
     logindialog.h \
-    myvk.h
+    myvk.h \
+    groupschoicemodel.h
 
 FORMS += \
         mainwindow.ui \

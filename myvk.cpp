@@ -3,12 +3,12 @@
 MyVK::MyVK(const QString& user_id, const QString& access_token, QObject* parent)
     : QObject(parent), user_id(user_id), access_token(access_token){}
 
-QString MyVK::getUserID()
+const QString& MyVK::getUserID()
 {
     return user_id;
 }
 
-QString MyVK::getAccessToken()
+const QString& MyVK::getAccessToken()
 {
     return access_token;
 }
@@ -88,7 +88,7 @@ void MyVK::getGroupsQuery(const QString& userId)
     netMgr->get(QNetworkRequest(request));
 }
 
-const std::vector<std::pair<QString, QString>>& MyVK::getGroupsResponse()
+const QVector<QPair<QString, QString>>& MyVK::getGroupsResponse()
 {
     return groupsResponse;
 }
@@ -133,8 +133,7 @@ void MyVK::slotGotGroups(QNetworkReply* reply)
 
     //qDebug() << "Count groups: " << (group.toElement().text()).toInt();
 
-    unsigned int count = (group.toElement().text()).toUInt();
-    groupsResponse.reserve(count);
+    groupsResponse.reserve((group.toElement().text()).toInt());
 
     group = response.firstChildElement("items");
     group = group.firstChildElement("group");
@@ -143,8 +142,8 @@ void MyVK::slotGotGroups(QNetworkReply* reply)
     {
         //qDebug() << "Id: " << ((group.firstChildElement("id")).toElement()).text();
         //qDebug() << "Name: " << ((group.firstChildElement("name")).toElement()).text();
-        groupsResponse.emplace_back(((group.firstChildElement("id")).toElement()).text(),
-                                    ((group.firstChildElement("name")).toElement()).text());
+        groupsResponse.push_back(qMakePair(((group.firstChildElement("id")).toElement()).text(),
+                                    ((group.firstChildElement("name")).toElement()).text()));
         group = group.nextSibling();
     }
 
