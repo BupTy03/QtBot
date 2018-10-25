@@ -9,6 +9,8 @@
 #include "logintovk.h"
 #include "logindialog.h"
 #include "myvk.h"
+#include "task.h"
+#include "taskwidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,12 +30,14 @@ private slots:
 
     void on_LoginAction_triggered();
 
+    void slotGroupsLoaded();
+
 private:
-    Ui::MainWindow *ui;
-    const QString app_id = "6667132";
-    QPair<QString, QString> user_info;
-    MyVK* myVK;
-    //LoginToVk* login2vk;
+    Ui::MainWindow *ui{nullptr};
+    const QString app_id{"6667132"};
+    MyVK* myVK{nullptr};
+    QList<Task*> tasks;
+    QVBoxLayout* tasks_layout{nullptr};
 };
 
 #endif // MAINWINDOW_H

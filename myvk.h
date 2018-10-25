@@ -8,22 +8,38 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#include <QDomDocument>
+
+#include <utility>
+#include <vector>
 
 class MyVK : public QObject
 {
     Q_OBJECT
 public:
-    MyVK(const QString& user_id, const QString& access_token, QObject* parent = nullptr);
-    void sendMsgToUser(const QString& userId, const QString& text);
+    explicit MyVK(const QString& user_id, const QString& access_token, QObject* parent = nullptr);
+
+    const QString& getUserID() const;
+    const QString& getAccessToken() const;
+
+    void sendMsgToUserQuery(const QString& userId, const QString& text);
+    void sendMsgToGroupQuery(const QString& groupId, const QString& text);
+    void getGroupsQuery(const QString& userId);
+
+    const QVector<QPair<QString, QString>>& getGroupsResponse() const;
 
 private:
     QString user_id;
     QString access_token;
-    QNetworkReply* net_reply;
+    QVector<QPair<QString, QString>> groupsResponse;
+
+signals:
+    void signalGroupsLoaded();
 
 private slots:
-    void MessageSent(QNetworkReply *reply);
-
+    void slotMessageToUserSent(QNetworkReply *reply);
+    void slotMessageToGroupSent(QNetworkReply *reply);
+    void slotGotGroups(QNetworkReply *reply);
 };
 
 #endif // MYVK_H

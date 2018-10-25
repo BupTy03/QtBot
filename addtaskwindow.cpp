@@ -1,7 +1,7 @@
 #include "addtaskwindow.h"
 #include "ui_addtaskwindow.h"
 
-AddTaskWindow::AddTaskWindow(QWidget *parent) :
+AddTaskWindow::AddTaskWindow(const QVector<QPair<QString, QString>>& groups, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddTaskWindow)
 {
@@ -10,6 +10,10 @@ AddTaskWindow::AddTaskWindow(QWidget *parent) :
 
     ui->intervalSpinBox->setMaximum(999);
     ui->periodSpinBox->setMaximum(3600);
+
+    groupsModel = new GroupsChoiceModel(groups, this);
+
+    ui->listView->setModel(groupsModel);
 }
 
 AddTaskWindow::~AddTaskWindow()
@@ -25,6 +29,11 @@ int AddTaskWindow::getInterval()
 int AddTaskWindow::getPeriod()
 {
     return ui->periodSpinBox->value();
+}
+
+const QLinkedList<int>& AddTaskWindow::getGroupsIndexes()
+{
+    return groupsModel->chosenGroups();
 }
 
 QString AddTaskWindow::getMessage()
