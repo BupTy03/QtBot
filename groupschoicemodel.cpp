@@ -25,6 +25,10 @@ QVariant GroupsChoiceModel::data(const QModelIndex& index, int role) const
     case Qt::DisplayRole:
         return (elems.at(index.row())).second;
     case Qt::CheckStateRole:
+        if(readOnly)
+        {
+            return QVariant();
+        }
         return (checklist.contains(index.row())) ? Qt::Checked : Qt::Unchecked;
     default:
         return QVariant();
@@ -33,6 +37,11 @@ QVariant GroupsChoiceModel::data(const QModelIndex& index, int role) const
 
 bool GroupsChoiceModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
+    if(readOnly)
+    {
+        return false;
+    }
+
     switch (role)
     {
     case Qt::CheckStateRole:
@@ -57,12 +66,23 @@ Qt::ItemFlags GroupsChoiceModel::flags(const QModelIndex& index) const
         return Qt::NoItemFlags;
     }
 
+    if(readOnly)
+    {
+        return Qt::ItemIsEnabled;
+    }
+
     return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 }
 
 void GroupsChoiceModel::setChecklist(const QLinkedList<int>& chkLst)
 {
     this->checklist = chkLst;
+    QVector<QPair<QString, QString>> new_gr;
+    for(auto indx : chkLst)
+    {
+        new_gr.append(this->elems.at(indx));
+    }
+    this->elems = std::move(new_gr);
 }
 
 const QLinkedList<int>& GroupsChoiceModel::chosenGroups() const
@@ -73,4 +93,9 @@ const QLinkedList<int>& GroupsChoiceModel::chosenGroups() const
 const QVector<QPair<QString, QString>>& GroupsChoiceModel::getGroups() const
 {
     return elems;
+}
+
+void GroupsChoiceModel::setReadOnly(bool flag)
+{
+    readOnly = flag;
 }

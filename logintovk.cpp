@@ -13,14 +13,16 @@ void LoginToVk::loadLogin()
     query.addQueryItem("client_id", app_id);
     query.addQueryItem("display", "popup");
     query.addQueryItem("redirect_uri", "https://oauth.vk.com/blank.html");
-    query.addQueryItem("scope", "331776"); //331776   266240
+    query.addQueryItem("scope", "266240"); //   331776   266240
     query.addQueryItem("response_type", "token");
     query.addQueryItem("v", "5.52");
-
 
     qDebug() << "Query:" << query.toString();
     url.setQuery(query);
     qDebug() << "Url:" << url.toString();
+
+    this->page()->profile()->setHttpCacheType(QWebEngineProfile::NoCache);
+    this->page()->profile()->setPersistentCookiesPolicy(QWebEngineProfile::NoPersistentCookies);
     load(url);
 }
 

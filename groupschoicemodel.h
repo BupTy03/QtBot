@@ -22,6 +22,7 @@ public:
 
     const QLinkedList<int>& chosenGroups() const;
     const QVector<QPair<QString, QString>>& getGroups() const;
+    void setReadOnly(bool flag = true);
 
 signals:
     void dataChanged(int);
@@ -29,6 +30,7 @@ signals:
 private:
     QVector<QPair<QString, QString>> elems;
     QLinkedList<int> checklist;
+    bool readOnly{false};
 };
 
 #endif // GROUPSCHOICEMODEL_H

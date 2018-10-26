@@ -30,7 +30,7 @@
     <item>
      <widget class="QScrollArea" name="scrollArea">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -50,7 +50,7 @@
          <x>0</x>
          <y>0</y>
          <width>744</width>
-         <height>249</height>
+         <height>477</height>
         </rect>
        </property>
        <property name="sizePolicy">

@@ -2,6 +2,7 @@
 #define LOGINTOVK_H
 
 #include <QWebEngineView>
+#include <QWebEngineProfile>
 #include <QUrlQuery>
 #include <QPair>
 #include <QRegExp>
