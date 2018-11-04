@@ -1,105 +1,54 @@
+#pragma once
 #ifndef TASK_H
 #define TASK_H
 
-#include <QString>
-#include <QTimer>
-#include <QDebug>
-#include <QLinkedList>
-#include <QDataStream>
+#include <QObject>
+
+#include "vkauth.h"
+#include "simpletimer.h"
+#include "queries_to_vk.h"
+
+#include <chrono>
 
 class Task : public QObject
 {
     Q_OBJECT
 public:
-    Task(){}
-    explicit Task(const QLinkedList<int>& indxs, const QString& text, int intrv, int per, QObject* parent = nullptr);
+    explicit Task(const QString& access_token,
+                  const QStringList& groups,
+                  const QString& message,
+                  int interval,
+                  int period,
+                  QObject* parent = nullptr);
 
-    Task(const Task& t);
-    Task& operator=(const Task& t);
+    explicit Task(QString&& access_token,
+                  QStringList&& groups,
+                  QString&& message,
+                  int interval,
+                  int period,
+                  QObject* parent = nullptr);
 
-    Task(Task&& t);
-    Task& operator=(Task&& t);
+    QString getMessage() const;
+    int getInterval() const;
+    int getPeriod() const;
+
+    bool isRemoved() const;
 
 public slots:
-    void changeGroups(int id);
-    void setMessage(const QString& text){ text_of_msg = text; qDebug() << "Changed message: " << text_of_msg; }
-    void setGroups(const QLinkedList<int>& gr){ gr_indxes = gr; qDebug() << "Changed groups: " << text_of_msg; }
-    void setInterval(int _int){ interval = _int; qDebug() << "Changed interval: " << interval; }
-    void setPeriod(int _per){ period = _per; qDebug() << "Changed period: " << period; }
-
-public:
-    inline const QString& getMessage() const { return text_of_msg; }
-    inline const QLinkedList<int>& getGroups() const { return gr_indxes; }
-    inline int getInterval() const { return interval; }
-    inline int getPeriod() const { return period; }
-
-    inline friend bool operator < (const Task& tsk1, const Task& tsk2)
-    {
-        return tsk1.period < tsk2.period;
-    }
-    inline friend bool operator > (const Task& tsk1, const Task& tsk2)
-    {
-        return tsk1.period > tsk2.period;
-    }
-
-    inline friend bool operator == (const Task& tsk1, const Task& tsk2)
-    {
-        return &tsk1 == &tsk2;
-    }
-    inline friend bool operator != (const Task& tsk1, const Task& tsk2)
-    {
-        return &tsk1 != &tsk2;
-    }
-
-    inline friend bool operator <= (const Task& tsk1, const Task& tsk2)
-    {
-        return tsk1 < tsk2 || tsk1 == tsk2;
-    }
-    inline friend bool operator >= (const Task& tsk1, const Task& tsk2)
-    {
-        return tsk1 > tsk2 || tsk1 == tsk2;
-    }
-
-    inline bool isActive() noexcept { return active; }
-
-    void start()
-    {
-        active = true;
-        timer.start(period*1000);
-    }
-    void stop()
-    {
-        active = false;
-        timer.stop();
-    }
-
-    friend QDebug operator<<(QDebug stream, const Task& t)
-    {
-        stream << "Indexes: [ ";
-        for(int i : t.gr_indxes)
-        {
-            stream << i << " ";
-        }
-        stream << "]";
-        stream <<
-                  "\nText of the message: " << t.text_of_msg <<
-                  "\nInterval: " << t.interval << "ms." <<
-                  "\nPeriod: " << t.period << "ms." <<
-                  "\nRemaining time: " << (t.timer).remainingTime() <<
-                  "\nActive: " << (t.active ? "yes" : "no");
-
-        return stream;
-    }
-
-    inline bool isTimeOut(){ return timer.remainingTime() == 0; }
+    void run();
+    void start();
+    void stop();
+    void removeTask();
 
 private:
-    QLinkedList<int> gr_indxes;
-    QString text_of_msg;
-    int interval;
-    int period;
-    QTimer timer;
-    bool active{false};
+    QStringList groupsIds_;
+    QString accessToken_;
+    QString message_;
+    bool active_;
+    int interval_;
+    int period_;
+    bool removed_;
+    SimpleTimer<std::chrono::milliseconds> timer_;
 };
 
 #endif // TASK_H

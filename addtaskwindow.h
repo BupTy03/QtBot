@@ -1,7 +1,8 @@
+#pragma once
 #ifndef ADDTASKWINDOW_H
 #define ADDTASKWINDOW_H
 
-#include "groupschoicemodel.h"
+#include "choicelistmodel.h"
 
 #include <QDialog>
 
@@ -14,17 +15,17 @@ class AddTaskWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddTaskWindow(const QVector<QPair<QString, QString>>& groups,  QWidget *parent = nullptr);
+    explicit AddTaskWindow(const QStringList& groups,  QWidget* parent = nullptr);
     ~AddTaskWindow();
 
     int getInterval();
     int getPeriod();
-    const QLinkedList<int>& getGroupsIndexes();
-    QString getMessage();
+    QVector<int> getGroupsIndexes();
+    QString getMessage() const;
 
 private:
-    Ui::AddTaskWindow *ui{nullptr};
-    GroupsChoiceModel* groupsModel{nullptr};
+    Ui::AddTaskWindow *ui;
+    ChoiceListModel* groupsModel_;
 };
 
 #endif // ADDTASKWINDOW_H

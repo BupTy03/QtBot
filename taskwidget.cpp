@@ -1,6 +1,6 @@
 #include "taskwidget.h"
 
-TaskWidget::TaskWidget(const Task& tsk, const MyVK* _vk, QWidget* parent) : QWidget(parent)
+TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* parent) : QWidget(parent)
 {
     this->setMinimumHeight(200);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
@@ -14,13 +14,11 @@ TaskWidget::TaskWidget(const Task& tsk, const MyVK* _vk, QWidget* parent) : QWid
 
     _layout1->addWidget(new QLabel("<b>Группы:</b>"));
 
-    this->groupsView = new QListView(this);
-    this->grChModel = new GroupsChoiceModel(_vk->getGroupsResponse(), this);
-    this->grChModel->setChecklist(tsk.getGroups());
-    this->grChModel->setReadOnly(true);
-    this->groupsView->setModel(this->grChModel);
-    //this->groupsView->setDisabled(true);
-    _layout1->addWidget(this->groupsView);
+    groupsView_ = new QListView(this);
+    grChModel_ = new ChoiceListModel(groups_list, this);
+    grChModel_->setReadOnly(true);
+    groupsView_->setModel(grChModel_);
+    _layout1->addWidget(groupsView_);
 
     HLayout->addLayout(_layout1);
 
@@ -28,34 +26,39 @@ TaskWidget::TaskWidget(const Task& tsk, const MyVK* _vk, QWidget* parent) : QWid
     QVBoxLayout* _layout2 = new QVBoxLayout;
 
     _layout2->addWidget(new QLabel("<b>Текст сообщения:</b>"));
-    this->messageEdit = new QTextEdit(this);
-    this->messageEdit->setText(tsk.getMessage());
-    this->messageEdit->setReadOnly(true);
-    _layout2->addWidget(this->messageEdit);
+    messageEdit_ = new QTextEdit(this);
+    messageEdit_->setText(task->getMessage());
+    messageEdit_->setReadOnly(true);
+    _layout2->addWidget(messageEdit_);
 
     HLayout->addLayout(_layout2);
 
     QVBoxLayout* _layout3 = new QVBoxLayout;
 
     _layout3->addWidget(new QLabel("<b>Задержка(в мс):</b>"));
-    this->intervalSB = new QSpinBox(this);
-    this->intervalSB->setValue(tsk.getInterval());
-    this->intervalSB->setSuffix(" мс.");
-    this->intervalSB->setReadOnly(true);
-    _layout3->addWidget(this->intervalSB);
+    intervalSB_ = new QSpinBox;
+    intervalSB_->setValue(task->getInterval());
+    intervalSB_->setSuffix(" мс.");
+    intervalSB_->setReadOnly(true);
+    _layout3->addWidget(intervalSB_);
     _layout3->addWidget(new QLabel("<b>Период(в сек):</b>"));
-    this->periodSB = new QSpinBox(this);
-    this->periodSB->setValue(tsk.getPeriod());
-    this->periodSB->setSuffix(" сек.");
-    this->periodSB->setReadOnly(true);
-    _layout3->addWidget(this->periodSB);
-    this->startBtn = new QPushButton(this);
-    this->startBtn->setText("Старт");
-    this->stopBtn = new QPushButton(this);
-    this->stopBtn->setText("Стоп");
-    this->stopBtn->setDisabled(true);
-    _layout3->addWidget(this->startBtn);
-    _layout3->addWidget(this->stopBtn);
+    periodSB_ = new QSpinBox;
+    periodSB_->setValue(task->getPeriod());
+    periodSB_->setSuffix(" сек.");
+    periodSB_->setReadOnly(true);
+    _layout3->addWidget(periodSB_);
+    startBtn_ = new QPushButton;
+    startBtn_->setText("Старт");
+    startBtn_->setDisabled(true);
+    stopBtn_ = new QPushButton;
+    stopBtn_->setText("Стоп");
+    stopBtn_->setEnabled(true);
+    removeBtn_ = new QPushButton;
+    removeBtn_->setText("Удалить");
+    removeBtn_->setEnabled(true);
+    _layout3->addWidget(startBtn_);
+    _layout3->addWidget(stopBtn_);
+    _layout3->addWidget(removeBtn_);
     _layout3->addItem(new QSpacerItem(0, 1, QSizePolicy::Preferred, QSizePolicy::Expanding));
 
     HLayout->addLayout(_layout3);
@@ -65,36 +68,33 @@ TaskWidget::TaskWidget(const Task& tsk, const MyVK* _vk, QWidget* parent) : QWid
 
     this->setLayout(GLayout);
 
-    connect(startBtn, &QPushButton::clicked, this, &TaskWidget::onStartBtnClick);
-    connect(stopBtn, &QPushButton::clicked, this, &TaskWidget::onStopBtnClick);
+    connect(startBtn_, &QPushButton::clicked, this, &TaskWidget::onStartBtnClick);
+    connect(stopBtn_, &QPushButton::clicked, this, &TaskWidget::onStopBtnClick);
+    connect(removeBtn_, &QPushButton::clicked, this, &TaskWidget::onRemoveBtnClick);
 
-//    connect(grChModel, SIGNAL(dataChanged(int)), &tsk, SLOT(changeGroups(int)));
-//    connect(messageEdit, &QTextEdit::textChanged, this, [this](){ emit messageChanged(messageEdit->toPlainText()); });
-//    connect(this, SIGNAL(messageChanged(const QString&)), &tsk, SLOT(setMessage(const QString&)));
-//    connect(intervalSB, SIGNAL(valueChanged(int)), &tsk, SLOT(setInterval(int)));
-//    connect(periodSB, SIGNAL(valueChanged(int)), &tsk, SLOT(setPeriod(int)));
+    connect(this, &TaskWidget::signalStart, task, &Task::start);
+    connect(this, &TaskWidget::signalStop, task, &Task::stop);
+    connect(this, &TaskWidget::signalRemove, task, &Task::removeTask);
+    connect(this, &TaskWidget::signalRemove, &TaskWidget::deleteLater);
 }
 
 void TaskWidget::onStartBtnClick()
 {
-    this->startBtn->setDisabled(true);
-//    this->groupsView->setDisabled(true);
-//    this->messageEdit->setDisabled(true);
-//    this->intervalSB->setDisabled(true);
-//    this->periodSB->setDisabled(true);
-
-    this->stopBtn->setEnabled(true);
+    startBtn_->setDisabled(true);
+    stopBtn_->setEnabled(true);
     emit signalStart();
 }
 
 void TaskWidget::onStopBtnClick()
 {
-    this->stopBtn->setDisabled(true);
-//    this->groupsView->setEnabled(true);
-//    this->messageEdit->setEnabled(true);
-//    this->intervalSB->setEnabled(true);
-//    this->periodSB->setEnabled(true);
-
-    this->startBtn->setEnabled(true);
+    stopBtn_->setDisabled(true);
+    startBtn_->setEnabled(true);
     emit signalStop();
+}
+
+void TaskWidget::onRemoveBtnClick()
+{
+    stopBtn_->setDisabled(true);
+    startBtn_->setDisabled(true);
+    emit signalRemove();
 }

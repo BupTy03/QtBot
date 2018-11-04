@@ -1,73 +1,83 @@
 #include "task.h"
 
-Task::Task(const QLinkedList<int>& indxs, const QString& text, int intrv, int per, QObject* parent)
-    : QObject(parent), gr_indxes(indxs), text_of_msg(text), interval(intrv), period(per)
+Task::Task(const QString& access_token,
+           const QStringList& groups_ids,
+           const QString& message,
+           int interval,
+           int period,
+           QObject* parent)
+    : QObject(parent),
+      groupsIds_(groups_ids),
+      accessToken_(access_token),
+      message_(message),
+      active_(true),
+      interval_(interval),
+      period_(period),
+      removed_(false)
 {
-    start();
+    timer_.start();
+    timer_.set_interval(std::chrono::milliseconds(period*1000));
 }
 
-Task::Task(const Task& t)
+Task::Task(QString&& access_token, QStringList&& groups_ids, QString&& message, int interval, int period, QObject* parent)
+    : QObject(parent),
+      groupsIds_(std::move(groups_ids)),
+      accessToken_(std::move(access_token)),
+      message_(std::move(message)),
+      active_(true),
+      interval_(interval),
+      period_(period),
+      removed_(false)
 {
-    this->gr_indxes = t.gr_indxes;
-    this->text_of_msg = t.text_of_msg;
-    this->interval = t.interval;
-    this->period = t.period;
-    this->timer.setInterval(t.interval);
-    this->active = t.active;
-
-    start();
+    timer_.start();
+    timer_.set_interval(std::chrono::milliseconds(period*1000));
 }
 
-Task& Task::operator=(const Task& t)
+QString Task::getMessage() const
 {
-    this->gr_indxes = t.gr_indxes;
-    this->text_of_msg = t.text_of_msg;
-    this->interval = t.interval;
-    this->period = t.period;
-    this->timer.setInterval(t.interval);
-    this->active = t.active;
-
-    start();
-    return *this;
+    return message_;
 }
 
-Task::Task(Task&& t)
+int Task::getInterval() const
 {
-    std::swap(this->gr_indxes, t.gr_indxes);
-    std::swap(this->text_of_msg, t.text_of_msg);
-    std::swap(this->interval, t.interval);
-    std::swap(this->period, t.period);
-    t.timer.stop();
-    this->timer.setInterval(t.interval);
-    std::swap(this->active, t.active);
-
-    start();
+    return interval_;
 }
 
-Task& Task::operator=(Task&& t)
+int Task::getPeriod() const
 {
-    std::swap(this->gr_indxes, t.gr_indxes);
-    std::swap(this->text_of_msg, t.text_of_msg);
-    std::swap(this->interval, t.interval);
-    std::swap(this->period, t.period);
-    t.timer.stop();
-    this->timer.setInterval(t.interval);
-    std::swap(this->active, t.active);
-
-    start();
-    return *this;
+    return period_;
 }
 
-void Task::changeGroups(int id)
+bool Task::isRemoved() const
 {
-    if(gr_indxes.contains(id))
+    return removed_;
+}
+
+void Task::run()
+{
+    if(removed_ || !active_ || !timer_.is_time_out())
     {
-        gr_indxes.removeAll(id);
+        return;
     }
-    else
+    for(const auto& groupId : groupsIds_)
     {
-        gr_indxes.append(id);
+        vk_query::messages_send_to_group(accessToken_, groupId, message_);
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval_));
     }
+    timer_.start();
+}
 
-    qDebug() << *this << "\n";
+void Task::start()
+{
+    active_ = true;
+}
+
+void Task::stop()
+{
+    active_ = false;
+}
+
+void Task::removeTask()
+{
+    removed_ = true;
 }
