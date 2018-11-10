@@ -45,9 +45,9 @@ private:
     QVector<QPair<QString, QString>> groups_;
     QVector<Task*> tasks_;
     QVBoxLayout* tasks_layout_;
-    std::thread thread_;
+    QThread* secondThread_;
+    QScrollArea* scrollArea_;
     bool pauseThread_;
-    std::mutex lock_;
 };
 
 #endif // MAINWINDOW_H

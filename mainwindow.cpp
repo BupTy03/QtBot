@@ -44,13 +44,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     vkAuth_ = new VKAuth(app_id_, this);
 
-    tasks_layout_ = new QVBoxLayout();
-    ui->scrollAreaWidgetContents->setMinimumHeight(50);
-    ui->scrollAreaWidgetContents->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Ignored);
-    ui->scrollAreaWidgetContents->setLayout(tasks_layout_);
+    tasks_layout_ = new QVBoxLayout;
 
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
+    QWidget* scrollWidget = new QWidget;
+    scrollWidget->setLayout(new QVBoxLayout);
+    (scrollWidget->layout())->setAlignment(Qt::AlignTop);
+    ui->scrollArea->setWidget(scrollWidget);
 
     connect(ui->LoginBtn, &QPushButton::released, ui->LoginAction, &QAction::trigger);
     connect(ui->ExitBtn, &QPushButton::released, ui->ExitAction, &QAction::trigger);
@@ -59,27 +61,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->NewTaskBtn->hide();
     ui->NewTaskAction->setDisabled(true);
 
-    thread_ = std::thread(
-    [this]()
-    {
-        std::mutex lock_thread;
-        while(true)
-        {
-            std::lock_guard<std::mutex> locker(lock_thread);
-
-            tasks_.erase(std::remove_if(std::begin(tasks_), std::end(tasks_), [](Task* t){ return t->isRemoved(); }), tasks_.end());
-
-            for(auto task : tasks_)
-            {
-                task->run();
-            }
-        }
-    });
-    thread_.detach();
+    secondThread_ = new QThread(this);
+    secondThread_->start();
 }
 
 MainWindow::~MainWindow()
 {
+    secondThread_->terminate();
     delete ui;
 }
 
@@ -105,8 +93,6 @@ void MainWindow::on_NewTaskAction_triggered()
         return;
     }
 
-    ui->scrollAreaWidgetContents->setMinimumHeight(ui->scrollAreaWidgetContents->minimumHeight() + 200);
-
     auto groupsIndexes = addTskWin.getGroupsIndexes();
     QStringList groups_names;
     QStringList groups_ids;
@@ -125,13 +111,13 @@ void MainWindow::on_NewTaskAction_triggered()
                                groups_ids,
                                addTskWin.getMessage(),
                                addTskWin.getInterval(),
-                               addTskWin.getPeriod(),
-                               this);
+                               addTskWin.getPeriod());
 
     TaskWidget* widget = new TaskWidget(curr_task, groups_names);
-    tasks_layout_->addWidget(widget);
 
-    addNewTask(curr_task);
+    (((ui->scrollArea)->widget())->layout())->addWidget(widget);
+
+    curr_task->moveToThread(secondThread_);
 }
 
 void MainWindow::on_LoginAction_triggered()
@@ -170,10 +156,4 @@ void MainWindow::on_LoginAction_triggered()
         qDebug() << "===================================End of list=====================================";
 #endif
     });
-}
-
-void MainWindow::addNewTask(Task* tsk)
-{
-    std::lock_guard<std::mutex> locker(lock_);
-    tasks_.push_back(tsk);
 }

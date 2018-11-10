@@ -2,7 +2,7 @@
 
 TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* parent) : QWidget(parent)
 {
-    this->setMinimumHeight(200);
+    this->setMinimumHeight(210);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
     QGridLayout* GLayout = new QGridLayout;
@@ -74,8 +74,7 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
 
     connect(this, &TaskWidget::signalStart, task, &Task::start);
     connect(this, &TaskWidget::signalStop, task, &Task::stop);
-    connect(this, &TaskWidget::signalRemove, task, &Task::removeTask);
-    connect(this, &TaskWidget::signalRemove, &TaskWidget::deleteLater);
+    connect(this, &TaskWidget::destroyed, task, &Task::deleteLater);
 }
 
 void TaskWidget::onStartBtnClick()
@@ -96,5 +95,5 @@ void TaskWidget::onRemoveBtnClick()
 {
     stopBtn_->setDisabled(true);
     startBtn_->setDisabled(true);
-    emit signalRemove();
+    this->deleteLater();
 }

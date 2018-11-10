@@ -5,7 +5,6 @@
 #include <QObject>
 
 #include "vkauth.h"
-#include "simpletimer.h"
 #include "queries_to_vk.h"
 
 #include <chrono>
@@ -21,24 +20,15 @@ public:
                   int period,
                   QObject* parent = nullptr);
 
-    explicit Task(QString&& access_token,
-                  QStringList&& groups,
-                  QString&& message,
-                  int interval,
-                  int period,
-                  QObject* parent = nullptr);
+    virtual void timerEvent(QTimerEvent* event) override;
 
     QString getMessage() const;
     int getInterval() const;
     int getPeriod() const;
 
-    bool isRemoved() const;
-
 public slots:
-    void run();
     void start();
     void stop();
-    void removeTask();
 
 private:
     QStringList groupsIds_;
@@ -47,8 +37,6 @@ private:
     bool active_;
     int interval_;
     int period_;
-    bool removed_;
-    SimpleTimer<std::chrono::milliseconds> timer_;
 };
 
 #endif // TASK_H

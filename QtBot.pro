@@ -41,8 +41,7 @@ HEADERS += \
     taskwidget.h \
     vkauth.h \
     queries_to_vk.h \
-    choicelistmodel.h \
-    simpletimer.h
+    choicelistmodel.h
 
 FORMS += \
         mainwindow.ui \
