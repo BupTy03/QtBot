@@ -6,6 +6,8 @@
 #include <QString>
 #include <QtWebEngineWidgets>
 
+#define DEBUG
+
 class VKAuth : public QObject
 {
     Q_OBJECT

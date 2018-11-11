@@ -36,15 +36,12 @@ QVector<QPair<QString, QString>> get_groups_from_json(const QJsonDocument& docum
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    pauseThread_(false)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("QtBot"));
 
     vkAuth_ = new VKAuth(app_id_, this);
-
-    tasks_layout_ = new QVBoxLayout;
 
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);

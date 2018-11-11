@@ -91,6 +91,7 @@ public:
 #ifdef DEBUG
         qDebug() << "\n=============Sending message to Group with ID: " << group_id << " =====================";
 #endif
+
         //QUrl request("https://api.vk.com/method/messages.send");
 
         QUrl request("localhost//test");

@@ -2,19 +2,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QWebEngineView>
-#include <QMessageBox>
-
-#include <thread>
-#include <mutex>
-
 #include "addtaskwindow.h"
 #include "task.h"
 #include "taskwidget.h"
-
 #include "vkauth.h"
-#include "vkquery.h"
+
+#include <QMainWindow>
+#include <QWebEngineView>
+#include <QMessageBox>
 
 namespace Ui {
 class MainWindow;
@@ -43,11 +38,7 @@ private:
     const QString app_id_{"6667132"};
     const QString scope_{"266240"}; //   331776   266240
     QVector<QPair<QString, QString>> groups_;
-    QVector<Task*> tasks_;
-    QVBoxLayout* tasks_layout_;
     QThread* secondThread_;
-    QScrollArea* scrollArea_;
-    bool pauseThread_;
 };
 
 #endif // MAINWINDOW_H
