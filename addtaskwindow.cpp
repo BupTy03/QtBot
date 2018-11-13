@@ -8,8 +8,8 @@ AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle(tr("Добавление задачи"));
 
-    ui->intervalSpinBox->setMaximum(999);
-    ui->periodSpinBox->setMaximum(3600);
+    ui->intervalSpinBox->setRange(0, 7200000);
+    ui->periodSpinBox->setRange(0, 18000);
 
     groupsModel_ = new ChoiceListModel(groups, this);
 

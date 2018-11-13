@@ -37,12 +37,14 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
 
     _layout3->addWidget(new QLabel("<b>Задержка(в мс):</b>"));
     intervalSB_ = new QSpinBox;
+    intervalSB_->setRange(0, 10000000);
     intervalSB_->setValue(task->getInterval());
     intervalSB_->setSuffix(" мс.");
     intervalSB_->setReadOnly(true);
     _layout3->addWidget(intervalSB_);
     _layout3->addWidget(new QLabel("<b>Период(в сек):</b>"));
     periodSB_ = new QSpinBox;
+    periodSB_->setRange(0, 10000000);
     periodSB_->setValue(task->getPeriod());
     periodSB_->setSuffix(" сек.");
     periodSB_->setReadOnly(true);
@@ -68,13 +70,13 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
 
     this->setLayout(GLayout);
 
-    connect(startBtn_, &QPushButton::clicked, this, &TaskWidget::onStartBtnClick);
-    connect(stopBtn_, &QPushButton::clicked, this, &TaskWidget::onStopBtnClick);
-    connect(removeBtn_, &QPushButton::clicked, this, &TaskWidget::onRemoveBtnClick);
+    QObject::connect(startBtn_, &QPushButton::clicked, this, &TaskWidget::onStartBtnClick);
+    QObject::connect(stopBtn_, &QPushButton::clicked, this, &TaskWidget::onStopBtnClick);
+    QObject::connect(removeBtn_, &QPushButton::clicked, this, &TaskWidget::onRemoveBtnClick);
 
-    connect(this, &TaskWidget::signalStart, task, &Task::start);
-    connect(this, &TaskWidget::signalStop, task, &Task::stop);
-    connect(this, &TaskWidget::destroyed, task, &Task::deleteLater);
+    QObject::connect(this, &TaskWidget::signalStart, task, &Task::start);
+    QObject::connect(this, &TaskWidget::signalStop, task, &Task::stop);
+    QObject::connect(this, &TaskWidget::destroyed, task, &Task::deleteLater);
 }
 
 void TaskWidget::onStartBtnClick()

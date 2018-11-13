@@ -19,7 +19,7 @@ Task::Task(const QString& access_token,
     startTimer(std::chrono::seconds(period));
 }
 
-void Task::timerEvent(QTimerEvent* event)
+void Task::timerEvent(QTimerEvent* /*event*/)
 {
     if(!active_)
     {

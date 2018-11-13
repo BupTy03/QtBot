@@ -24,7 +24,7 @@ void VKAuth::auth(QString scope)
     browser_.page()->profile()->setPersistentCookiesPolicy(QWebEngineProfile::NoPersistentCookies);
     browser_.load(url);
 
-    connect(&browser_, &QWebEngineView::urlChanged, [this](const QUrl& url)
+    QObject::connect(&browser_, &QWebEngineView::urlChanged, [this](const QUrl& url)
     {
 #ifdef DEBUG
         qDebug() << "Response URL: " << url.toString();

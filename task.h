@@ -18,7 +18,7 @@ public:
                   int period,
                   QObject* parent = nullptr);
 
-    virtual void timerEvent(QTimerEvent* event) override;
+    virtual void timerEvent(QTimerEvent* /*event*/) override;
 
     QString getMessage() const;
     int getInterval() const;

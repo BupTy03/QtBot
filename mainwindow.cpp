@@ -51,9 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     (scrollWidget->layout())->setAlignment(Qt::AlignTop);
     ui->scrollArea->setWidget(scrollWidget);
 
-    connect(ui->LoginBtn, &QPushButton::released, ui->LoginAction, &QAction::trigger);
-    connect(ui->ExitBtn, &QPushButton::released, ui->ExitAction, &QAction::trigger);
-    connect(ui->NewTaskBtn, &QPushButton::released, ui->NewTaskAction, &QAction::trigger);
+    QObject::connect(ui->LoginBtn, &QPushButton::released, ui->LoginAction, &QAction::trigger);
+    QObject::connect(ui->ExitBtn, &QPushButton::released, ui->ExitAction, &QAction::trigger);
+    QObject::connect(ui->NewTaskBtn, &QPushButton::released, ui->NewTaskAction, &QAction::trigger);
 
     ui->NewTaskBtn->hide();
     ui->NewTaskAction->setDisabled(true);
@@ -123,7 +123,7 @@ void MainWindow::on_LoginAction_triggered()
     ui->LoginBtn->setDisabled(true);
 
     vkAuth_->auth(scope_);
-    connect(vkAuth_, &VKAuth::done, [this](bool success)
+    QObject::connect(vkAuth_, &VKAuth::done, [this](bool success)
     {
         if(!success)
         {
