@@ -2,8 +2,6 @@
 #ifndef ADDTASKWINDOW_H
 #define ADDTASKWINDOW_H
 
-#include "groupschoicemodel.h"
-
 #include <QDialog>
 #include <QStandardItem>
 #include <QStandardItemModel>
