@@ -29,23 +29,22 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     addtaskwindow.cpp \
-    logintovk.cpp \
-    logindialog.cpp \
-    myvk.cpp \
-    groupschoicemodel.cpp
+    task.cpp \
+    taskwidget.cpp \
+    vkauth.cpp \
+    queries_to_vk.cpp
 
 HEADERS += \
         mainwindow.h \
     addtaskwindow.h \
-    logintovk.h \
-    logindialog.h \
-    myvk.h \
-    groupschoicemodel.h
+    task.h \
+    taskwidget.h \
+    vkauth.h \
+    queries_to_vk.h
 
 FORMS += \
         mainwindow.ui \
-    addtaskwindow.ui \
-    logindialog.ui
+    addtaskwindow.ui
 
 RESOURCES += \
     resouces.qrc

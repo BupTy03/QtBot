@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -6,9 +7,9 @@
 #include <QMessageBox>
 
 #include "addtaskwindow.h"
-#include "logintovk.h"
-#include "logindialog.h"
-#include "myvk.h"
+#include "task.h"
+#include "taskwidget.h"
+#include "vkauth.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,7 +19,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -28,12 +29,15 @@ private slots:
 
     void on_LoginAction_triggered();
 
-    void slotGroupsLoaded();
+    void checkLogin(bool success);
 
 private:
-    Ui::MainWindow *ui{nullptr};
-    const QString app_id{"6667132"};
-    MyVK* myVK{nullptr};
+    Ui::MainWindow *ui;
+    VKAuth* vkAuth_;
+    const QString app_id_{"6667132"};
+    const QString scope_{"266240"}; //   331776   266240
+    QVector<QPair<QString, QString>> groups_;
+    QThread* secondThread_;
 };
 
 #endif // MAINWINDOW_H

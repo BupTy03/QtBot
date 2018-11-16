@@ -1,19 +1,27 @@
 #include "addtaskwindow.h"
 #include "ui_addtaskwindow.h"
 
-AddTaskWindow::AddTaskWindow(const QVector<QPair<QString, QString>>& groups, QWidget *parent) :
+AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddTaskWindow)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Добавление задачи"));
 
-    ui->intervalSpinBox->setMaximum(999);
-    ui->periodSpinBox->setMaximum(3600);
+    ui->intervalSpinBox->setRange(0, 7200000);
+    ui->periodSpinBox->setRange(0, 18000);
 
-    groupsModel = new GroupsChoiceModel(groups, this);
+    groupsModel_ = new QStandardItemModel(this);
 
-    ui->listView->setModel(groupsModel);
+    for(const auto& group : groups)
+    {
+        QStandardItem* tmp = new QStandardItem(group);
+        tmp->setCheckable(true);
+        tmp->setEditable(false);
+        groupsModel_->appendRow(tmp);
+    }
+
+    ui->listView->setModel(groupsModel_);
 }
 
 AddTaskWindow::~AddTaskWindow()
@@ -31,12 +39,21 @@ int AddTaskWindow::getPeriod()
     return ui->periodSpinBox->value();
 }
 
-const QSet<int>& AddTaskWindow::getGroupsIndexesSet()
-{
-    return groupsModel->chosenGroupsSet();
+QVector<int> AddTaskWindow::getGroupsIndexes()
+{   
+    QVector<int> indexes;
+    const auto rcount = groupsModel_->rowCount();
+    for(int i = 0; i < rcount; ++i)
+    {
+        if((groupsModel_->item(i, 0))->checkState() == Qt::Checked)
+        {
+            indexes.push_back(i);
+        }
+    }
+    return indexes;
 }
 
-QString AddTaskWindow::getMessage()
+QString AddTaskWindow::getMessage() const
 {
     return ui->textMessage->toPlainText();
 }
