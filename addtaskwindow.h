@@ -2,9 +2,9 @@
 #ifndef ADDTASKWINDOW_H
 #define ADDTASKWINDOW_H
 
-#include "choicelistmodel.h"
-
 #include <QDialog>
+#include <QStandardItem>
+#include <QStandardItemModel>
 
 namespace Ui {
 class AddTaskWindow;
@@ -25,7 +25,7 @@ public:
 
 private:
     Ui::AddTaskWindow *ui;
-    ChoiceListModel* groupsModel_;
+    QStandardItemModel* groupsModel_;
 };
 
 #endif // ADDTASKWINDOW_H

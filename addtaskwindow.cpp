@@ -11,7 +11,15 @@ AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
     ui->intervalSpinBox->setRange(0, 7200000);
     ui->periodSpinBox->setRange(0, 18000);
 
-    groupsModel_ = new ChoiceListModel(groups, this);
+    groupsModel_ = new QStandardItemModel(this);
+
+    for(const auto& group : groups)
+    {
+        QStandardItem* tmp = new QStandardItem(group);
+        tmp->setCheckable(true);
+        tmp->setEditable(false);
+        groupsModel_->appendRow(tmp);
+    }
 
     ui->listView->setModel(groupsModel_);
 }
@@ -32,8 +40,17 @@ int AddTaskWindow::getPeriod()
 }
 
 QVector<int> AddTaskWindow::getGroupsIndexes()
-{
-    return groupsModel_->getChosenElems();
+{   
+    QVector<int> indexes;
+    const auto rcount = groupsModel_->rowCount();
+    for(int i = 0; i < rcount; ++i)
+    {
+        if((groupsModel_->item(i, 0))->checkState() == Qt::Checked)
+        {
+            indexes.push_back(i);
+        }
+    }
+    return indexes;
 }
 
 QString AddTaskWindow::getMessage() const

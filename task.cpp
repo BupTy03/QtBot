@@ -1,7 +1,5 @@
 #include "task.h"
 
-#include <chrono>
-
 Task::Task(const QString& access_token,
            const QStringList& groups_ids,
            const QString& message,
@@ -16,7 +14,7 @@ Task::Task(const QString& access_token,
       interval_(interval),
       period_(period)
 {
-    startTimer(std::chrono::seconds(period));
+    startTimer(period_*1000);
 }
 
 void Task::timerEvent(QTimerEvent* /*event*/)
@@ -29,7 +27,7 @@ void Task::timerEvent(QTimerEvent* /*event*/)
     for(const auto& groupId : groupsIds_)
     {
         vk_query::messages_send_to_group(accessToken_, groupId, message_);
-        (this->thread())->msleep(static_cast<unsigned int>(interval_));
+        (this->thread())->msleep(static_cast<unsigned long>(interval_));
     }
 }
 

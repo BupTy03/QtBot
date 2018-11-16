@@ -2,14 +2,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QMainWindow>
+#include <QWebEngineView>
+#include <QMessageBox>
+
 #include "addtaskwindow.h"
 #include "task.h"
 #include "taskwidget.h"
 #include "vkauth.h"
-
-#include <QMainWindow>
-#include <QWebEngineView>
-#include <QMessageBox>
 
 namespace Ui {
 class MainWindow;
@@ -29,8 +29,7 @@ private slots:
 
     void on_LoginAction_triggered();
 
-private:
-    void addNewTask(Task* tsk);
+    void checkLogin(bool success);
 
 private:
     Ui::MainWindow *ui;

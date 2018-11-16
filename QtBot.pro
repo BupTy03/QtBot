@@ -32,7 +32,6 @@ SOURCES += \
     task.cpp \
     taskwidget.cpp \
     vkauth.cpp \
-    choicelistmodel.cpp \
     queries_to_vk.cpp
 
 HEADERS += \
@@ -41,8 +40,7 @@ HEADERS += \
     task.h \
     taskwidget.h \
     vkauth.h \
-    queries_to_vk.h \
-    choicelistmodel.h
+    queries_to_vk.h
 
 FORMS += \
         mainwindow.ui \

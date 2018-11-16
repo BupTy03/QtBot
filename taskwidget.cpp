@@ -15,8 +15,16 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
     _layout1->addWidget(new QLabel("<b>Группы:</b>"));
 
     groupsView_ = new QListView(this);
-    grChModel_ = new ChoiceListModel(groups_list, this);
-    grChModel_->setReadOnly(true);
+
+    grChModel_ = new QStandardItemModel(this);
+
+    for(const auto& group : groups_list)
+    {
+        QStandardItem* tmp = new QStandardItem(group);
+        tmp->setEditable(false);
+        grChModel_->appendRow(tmp);
+    }
+
     groupsView_->setModel(grChModel_);
     _layout1->addWidget(groupsView_);
 

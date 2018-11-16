@@ -3,10 +3,10 @@
 #define TASKWIDGET_H
 
 #include "task.h"
-#include "choicelistmodel.h"
 
 #include <QtWidgets>
-#include <QScopedPointer>
+#include <QStandardItem>
+#include <QStandardItemModel>
 
 class TaskWidget : public QWidget
 {
@@ -25,7 +25,7 @@ private slots:
     void onRemoveBtnClick();
 
 private:
-    ChoiceListModel* grChModel_;
+    QStandardItemModel* grChModel_;
     QListView* groupsView_;
     QTextEdit* messageEdit_;
     QSpinBox* intervalSB_;

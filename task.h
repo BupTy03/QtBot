@@ -2,10 +2,10 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <QObject>
+
 #include "vkauth.h"
 #include "queries_to_vk.h"
-
-#include <QObject>
 
 class Task : public QObject
 {

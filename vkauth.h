@@ -24,6 +24,9 @@ public:
 signals:
     void done(bool);
 
+private slots:
+    void checkAuth(const QUrl& url);
+
 private:
     QWebEngineView browser_;
     QString appID_;

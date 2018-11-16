@@ -28,8 +28,9 @@ QVector<QPair<QString, QString>> get_groups_from_json(const QJsonDocument& docum
         QJsonObject tmpGroup = gr.toObject();
 
         groups.push_back(qMakePair(
-         QString::number(tmpGroup["id"].toInt()),
-                         tmpGroup["name"].toString()));
+                         QString::number(tmpGroup["id"].toInt()),
+                         tmpGroup["name"].toString()
+                        ));
     }
     return groups;
 }
@@ -54,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->LoginBtn, &QPushButton::released, ui->LoginAction, &QAction::trigger);
     QObject::connect(ui->ExitBtn, &QPushButton::released, ui->ExitAction, &QAction::trigger);
     QObject::connect(ui->NewTaskBtn, &QPushButton::released, ui->NewTaskAction, &QAction::trigger);
+
+    QObject::connect(vkAuth_, &VKAuth::done, this, &MainWindow::checkLogin);
 
     ui->NewTaskBtn->hide();
     ui->NewTaskAction->setDisabled(true);
@@ -121,36 +124,36 @@ void MainWindow::on_LoginAction_triggered()
 {
     ui->LoginAction->setDisabled(true);
     ui->LoginBtn->setDisabled(true);
-
     vkAuth_->auth(scope_);
-    QObject::connect(vkAuth_, &VKAuth::done, [this](bool success)
+}
+
+void MainWindow::checkLogin(bool success)
+{
+    if(!success)
     {
-        if(!success)
-        {
-            ui->LoginAction->setEnabled(true);
-            ui->LoginBtn->setEnabled(true);
-            QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
-            return;
-        }
-        ui->LoginBtn->hide();
+        ui->LoginAction->setEnabled(true);
+        ui->LoginBtn->setEnabled(true);
+        QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
+        return;
+    }
+    ui->LoginBtn->hide();
 
-        ui->NewTaskBtn->show();
-        ui->NewTaskAction->setEnabled(true);
+    ui->NewTaskBtn->show();
+    ui->NewTaskAction->setEnabled(true);
 
-        groups_ = get_groups_from_json(vk_query::groups_get(vkAuth_->get_access_token(), vkAuth_->get_user_id()));
+    groups_ = get_groups_from_json(vk_query::groups_get(vkAuth_->get_access_token(), vkAuth_->get_user_id()));
 
 #ifdef DEBUG
-        qDebug() << "\n\n===================================Groups list=====================================";
-        std::transform(std::cbegin(groups_), std::cend(groups_), std::ostream_iterator<std::string>(std::cout, "\n"), [](const QPair<QString, QString>& p)
-        {
-             QString result;
-             result.push_back("Id of group: ");
-             result.push_back(p.first);
-             result.push_back("\nName of group: ");
-             result.push_back(p.second);
-             return result.toStdString();
-        });
-        qDebug() << "===================================End of list=====================================";
-#endif
+    qDebug() << "\n\n===================================Groups list=====================================";
+    std::transform(std::cbegin(groups_), std::cend(groups_), std::ostream_iterator<std::string>(std::cout, "\n"), [](const QPair<QString, QString>& p)
+    {
+         QString result;
+         result.push_back("Id of group: ");
+         result.push_back(p.first);
+         result.push_back("\nName of group: ");
+         result.push_back(p.second);
+         return result.toStdString();
     });
+    qDebug() << "===================================End of list=====================================";
+#endif
 }
