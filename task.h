@@ -18,6 +18,13 @@ public:
                   int period,
                   QObject* parent = nullptr);
 
+    explicit Task(QString&& access_token,
+                  QStringList&& groups,
+                  QString&& message,
+                  int interval,
+                  int period,
+                  QObject* parent = nullptr);
+
     virtual void timerEvent(QTimerEvent* /*event*/) override;
 
     QString getMessage() const;

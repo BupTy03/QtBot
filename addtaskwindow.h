@@ -15,7 +15,7 @@ class AddTaskWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddTaskWindow(const QStringList& groups,  QWidget* parent = nullptr);
+    explicit AddTaskWindow(const QVector<QPair<QString, QString>>& groups,  QWidget* parent = nullptr);
     ~AddTaskWindow();
 
     int getInterval();

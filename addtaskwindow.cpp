@@ -1,7 +1,7 @@
 #include "addtaskwindow.h"
 #include "ui_addtaskwindow.h"
 
-AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
+AddTaskWindow::AddTaskWindow(const QVector<QPair<QString, QString>>& groups, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AddTaskWindow)
 {
@@ -15,7 +15,7 @@ AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
 
     for(const auto& group : groups)
     {
-        QStandardItem* tmp = new QStandardItem(group);
+        QStandardItem* tmp = new QStandardItem(group.second);
         tmp->setCheckable(true);
         tmp->setEditable(false);
         groupsModel_->appendRow(tmp);

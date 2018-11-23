@@ -35,7 +35,7 @@ private:
     Ui::MainWindow *ui;
     VKAuth* vkAuth_;
     const QString app_id_{"6667132"};
-    const QString scope_{"266240"}; //   331776   266240
+    const QString scope_{"270336"}; //   331776   266240
     QVector<QPair<QString, QString>> groups_;
     QThread* secondThread_;
 };

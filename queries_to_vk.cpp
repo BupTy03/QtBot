@@ -73,19 +73,22 @@ QJsonDocument vk_query::messages_send_to_group(const QString& access_token, cons
     qDebug() << "\n=============Sending message to Group with ID: " << group_id << " =====================";
 #endif
 
-    //QUrl request("https://api.vk.com/method/messages.send");
+    //QUrl request("https://api.vk.com/method/wall.post");
 
     QUrl request("localhost//test");
 
     QUrlQuery query(request);
-    query.addQueryItem("group_id", group_id);
+//    query.addQueryItem("group_id", group_id);
+//    query.addQueryItem("message", message);
+    query.addQueryItem("owner_id", QString("-").append(group_id));
+    query.addQueryItem("friends_only", "1");
     query.addQueryItem("message", message);
     query.addQueryItem("access_token", access_token);
     query.addQueryItem("test_mode", "1");
     query.addQueryItem("v", "5.52");
 
 #ifdef DEBUG
-    qDebug() << "Query: " << "https://api.vk.com/method/messages.send" << query.toString();
+    qDebug() << "Query: " << "https://api.vk.com/method/wall.post?" << query.toString();
 #endif
 
     request.setQuery(query);
