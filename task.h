@@ -27,6 +27,7 @@ public:
 
     virtual void timerEvent(QTimerEvent* /*event*/) override;
 
+    const QStringList& groupsIds() const;
     QString getMessage() const;
     int getInterval() const;
     int getPeriod() const;

@@ -106,7 +106,7 @@ void MainWindow::on_NewTaskAction_triggered()
                                addTskWin.getInterval(),
                                addTskWin.getPeriod());
 
-    TaskWidget* widget = new TaskWidget(curr_task, groups_names);
+    TaskWidget* widget = new TaskWidget(curr_task, groups_ids);
 
     (((ui->scrollArea)->widget())->layout())->addWidget(widget);
 

@@ -43,16 +43,16 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
 
     QVBoxLayout* _layout3 = new QVBoxLayout;
 
-    _layout3->addWidget(new QLabel("<b>Задержка(в мс):</b>"));
+    _layout3->addWidget(new QLabel("<b>Задержка(в сек):</b>"));
     intervalSB_ = new QSpinBox;
-    intervalSB_->setRange(0, 10000000);
+    intervalSB_->setRange(1, 10000000);
     intervalSB_->setValue(task->getInterval());
-    intervalSB_->setSuffix(" мс.");
+    intervalSB_->setSuffix(" сек.");
     intervalSB_->setReadOnly(true);
     _layout3->addWidget(intervalSB_);
     _layout3->addWidget(new QLabel("<b>Период(в сек):</b>"));
     periodSB_ = new QSpinBox;
-    periodSB_->setRange(0, 10000000);
+    periodSB_->setRange(1, 10000000);
     periodSB_->setValue(task->getPeriod());
     periodSB_->setSuffix(" сек.");
     periodSB_->setReadOnly(true);

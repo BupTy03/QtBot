@@ -67,7 +67,7 @@ QJsonDocument vk_query::messages_send_to_user(const QString& access_token, const
     return get_request(QNetworkRequest(request), wait_time);
 }
 
-QJsonDocument vk_query::messages_send_to_group(const QString& access_token, const QString& group_id, const QString& message, int wait_time)
+QJsonDocument vk_query::wall_post_to_group(const QString& access_token, const QString& group_id, const QString& message, int wait_time)
 {
 #ifdef DEBUG
     qDebug() << "\n=============Sending message to Group with ID: " << group_id << " =====================";

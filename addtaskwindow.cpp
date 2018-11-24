@@ -8,8 +8,8 @@ AddTaskWindow::AddTaskWindow(const QVector<QPair<QString, QString>>& groups, QWi
     ui->setupUi(this);
     this->setWindowTitle(tr("Добавление задачи"));
 
-    ui->intervalSpinBox->setRange(0, 7200000);
-    ui->periodSpinBox->setRange(0, 18000);
+    ui->intervalSpinBox->setRange(1, 10000);
+    ui->periodSpinBox->setRange(1, 18000);
 
     groupsModel_ = new QStandardItemModel(this);
 
