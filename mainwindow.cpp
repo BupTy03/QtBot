@@ -78,7 +78,15 @@ void MainWindow::on_ExitAction_triggered()
 
 void MainWindow::on_NewTaskAction_triggered()
 {
-    AddTaskWindow addTskWin(groups_);
+    QStringList groups_names_;
+    groups_names_.reserve(groups_.size());
+
+    std::transform(groups_.cbegin(), groups_.cend(), std::back_inserter(groups_names_),
+    [](const auto& p){
+        return p.second;
+    });
+
+    AddTaskWindow addTskWin(groups_names_);
     addTskWin.setModal(true);
 
     if(!addTskWin.exec())
