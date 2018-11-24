@@ -78,8 +78,6 @@ QJsonDocument vk_query::messages_send_to_group(const QString& access_token, cons
     QUrl request("localhost//test");
 
     QUrlQuery query(request);
-//    query.addQueryItem("group_id", group_id);
-//    query.addQueryItem("message", message);
     query.addQueryItem("owner_id", QString("-").append(group_id));
     query.addQueryItem("friends_only", "1");
     query.addQueryItem("message", message);
