@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->NewTaskBtn->hide();
     ui->NewTaskAction->setDisabled(true);
+    ui->TokenAction->setDisabled(true);
 
     secondThread_ = new QThread(this);
     secondThread_->start();
@@ -126,6 +127,7 @@ void MainWindow::on_LoginAction_triggered()
     ui->LoginAction->setDisabled(true);
     ui->LoginBtn->setDisabled(true);
     vkAuth_->auth(scope_);
+    ui->TokenAction->setEnabled(true);
 }
 
 void MainWindow::checkLogin(bool success)
@@ -157,4 +159,9 @@ void MainWindow::checkLogin(bool success)
     });
     qDebug() << "===================================End of list=====================================";
 #endif
+}
+
+void MainWindow::on_TokenAction_triggered()
+{
+    vkAuth_->reauth(scope_);
 }

@@ -31,6 +31,16 @@ void VKAuth::auth(QString scope)
     browser_.show();
 }
 
+void VKAuth::reauth(QString scope)
+{
+    (((browser_.page())->profile())->cookieStore())->deleteAllCookies();
+    ((browser_.page())->profile())->clearHttpCache();
+    //((browser_.page())->profile())->setHttpCacheType(QWebEngineProfile::NoCache);
+    //((browser_.page())->profile())->setPersistentCookiesPolicy(QWebEngineProfile::NoPersistentCookies);
+
+    auth(scope);
+}
+
 bool VKAuth::isValid()
 {
     return !accessToken_.isEmpty() && !userID_.isEmpty();

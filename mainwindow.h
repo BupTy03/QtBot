@@ -31,6 +31,8 @@ private slots:
 
     void checkLogin(bool success);
 
+    void on_TokenAction_triggered();
+
 private:
     Ui::MainWindow *ui;
     VKAuth* vkAuth_;
