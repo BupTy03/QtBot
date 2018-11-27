@@ -15,6 +15,15 @@ namespace Ui {
 class MainWindow;
 }
 
+struct User
+{
+    User(QString id, QString name, QString access_token)
+        : id(std::move(id)), name(std::move(name)), access_token(std::move(access_token)){}
+    QString id;
+    QString name;
+    QString access_token;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -30,6 +39,8 @@ private slots:
     void on_LoginAction_triggered();
 
     void checkLogin(bool success);
+
+    void on_TokenAction_triggered();
 
 private:
     Ui::MainWindow *ui;

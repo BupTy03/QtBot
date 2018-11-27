@@ -140,6 +140,7 @@
      <string>Меню</string>
     </property>
     <addaction name="LoginAction"/>
+    <addaction name="TokenAction"/>
     <addaction name="NewTaskAction"/>
     <addaction name="ExitAction"/>
    </widget>
@@ -189,6 +190,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="TokenAction">
+   <property name="icon">
+    <iconset resource="resouces.qrc">
+     <normaloff>:/res/img/update.png</normaloff>:/res/img/update.png</iconset>
+   </property>
+   <property name="text">
+    <string>Обновить token</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
    </property>
   </action>
  </widget>

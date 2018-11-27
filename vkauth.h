@@ -15,6 +15,7 @@ public:
     explicit VKAuth(QString appID, QObject* parent = nullptr);
 
     void auth(QString scope);
+    void reauth(QString scope);
     bool isValid();
 
     QString get_app_id() const {return appID_;}
