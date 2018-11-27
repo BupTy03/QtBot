@@ -16,6 +16,14 @@ namespace Ui {
 class AddTaskWindow;
 }
 
+struct Group
+{
+    Group(QString id, QString name)
+        : id(std::move(id)), name(std::move(name)){}
+    QString id;
+    QString name;
+};
+
 class AddTaskWindow : public QDialog
 {
     Q_OBJECT
