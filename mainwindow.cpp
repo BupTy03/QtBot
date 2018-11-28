@@ -7,34 +7,6 @@
 
 #include "queries_to_vk.h"
 
-QVector<QPair<QString, QString>> get_groups_from_json(const QJsonDocument& document)
-{
-    QJsonObject response = (document.object())["response"].toObject();
-
-    int countGr = response["count"].toInt();
-
-    if(countGr <= 0)
-    {
-        return QVector<QPair<QString, QString>>();
-    }
-
-    QVector<QPair<QString, QString>> groups;
-    groups.reserve(countGr);
-
-    QJsonArray items = response["items"].toArray();
-
-    for(auto gr : items)
-    {
-        QJsonObject tmpGroup = gr.toObject();
-
-        groups.push_back(qMakePair(
-                         QString::number(tmpGroup["id"].toInt()),
-                         tmpGroup["name"].toString()
-                        ));
-    }
-    return groups;
-}
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -87,7 +59,7 @@ void MainWindow::on_NewTaskAction_triggered()
         return p.second;
     });
 
-    AddTaskWindow addTskWin(groups_names_);
+    AddTaskWindow addTskWin(vkAuth_->get_access_token(), vkAuth_->get_user_id());
     addTskWin.setModal(true);
 
     if(!addTskWin.exec())
@@ -95,27 +67,27 @@ void MainWindow::on_NewTaskAction_triggered()
         return;
     }
 
-    auto groupsIndexes = addTskWin.getGroupsIndexes();
-    QStringList groups_names;
-    QStringList groups_ids;
+//    auto groupsIndexes = addTskWin.getGroupsIndexes();
+//    QStringList groups_names;
+//    QStringList groups_ids;
 
-    groups_names.reserve(groupsIndexes.size());
-    groups_ids.reserve(groupsIndexes.size());
+//    groups_names.reserve(groupsIndexes.size());
+//    groups_ids.reserve(groupsIndexes.size());
 
-    for(auto index : groupsIndexes)
-    {
-        const auto& group = groups_.at(index);
-        groups_names.push_back(group.second);
-        groups_ids.push_back(group.first);
-    }
+//    for(auto index : groupsIndexes)
+//    {
+//        const auto& group = groups_.at(index);
+//        groups_names.push_back(group.second);
+//        groups_ids.push_back(group.first);
+//    }
 
     Task* curr_task = new Task(vkAuth_->get_access_token(),
-                               groups_ids,
+                               addTskWin.getGroupsIds(),
                                addTskWin.getMessage(),
                                addTskWin.getInterval(),
                                addTskWin.getPeriod());
 
-    TaskWidget* widget = new TaskWidget(curr_task, groups_ids);
+    TaskWidget* widget = new TaskWidget(curr_task, addTskWin.getGroupsNames());
 
     (((ui->scrollArea)->widget())->layout())->addWidget(widget);
 
@@ -144,11 +116,12 @@ void MainWindow::checkLogin(bool success)
     ui->NewTaskBtn->show();
     ui->NewTaskAction->setEnabled(true);
 
-    groups_ = get_groups_from_json(vk_query::groups_get(vkAuth_->get_access_token(), vkAuth_->get_user_id()));
+    //groups_ = get_groups_from_json(vk_query::groups_get(vkAuth_->get_access_token(), vkAuth_->get_user_id()));
 
-#ifdef DEBUG
+#if 0
     qDebug() << "\n\n===================================Groups list=====================================";
-    std::transform(std::cbegin(groups_), std::cend(groups_), std::ostream_iterator<std::string>(std::cout, "\n"), [](const QPair<QString, QString>& p)
+    std::transform(std::cbegin(groups_), std::cend(groups_), std::ostream_iterator<std::string>(std::cout, "\n"),
+    [](const QPair<QString, QString>& p)
     {
          QString result;
          result.push_back("Id of group: ");

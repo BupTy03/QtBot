@@ -1,10 +1,51 @@
 #include "addtaskwindow.h"
 #include "ui_addtaskwindow.h"
+#include "queries_to_vk.h"
 
-AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
+QVector<std::shared_ptr<Group>> get_groups_from_json(const QJsonDocument& document)
+{
+    QJsonObject response = (document.object())["response"].toObject();
+
+    const auto countGr = response["count"].toInt();
+
+    QVector<std::shared_ptr<Group>> groups;
+    groups.reserve(countGr);
+
+    QJsonArray items = response["items"].toArray();
+
+    for(auto gr : items)
+    {
+        QJsonObject tmpGroup = gr.toObject();
+
+        groups.push_back(std::make_shared<Group>(
+                         QString::number(tmpGroup["id"].toInt()),
+                         tmpGroup["name"].toString()
+                        ));
+    }
+    return groups;
+}
+
+//AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
+//    QDialog(parent),
+//    ui(new Ui::AddTaskWindow),
+//    userGroups_(groups)
+//{
+//    ui->setupUi(this);
+//    this->setWindowTitle(tr("Добавление задачи"));
+//    this->setWindowFlags (this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+//    ui->intervalSpinBox->setRange(1, 10000);
+//    ui->periodSpinBox->setRange(1, 18000);
+
+//    groupsModel_ = new QStandardItemModel(this);
+
+//    ui->listView->setModel(groupsModel_);
+//    ui->radioBtnList->toggle();
+//}
+
+AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id, QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::AddTaskWindow),
-    userGroups_(groups)
+    ui(new Ui::AddTaskWindow)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Добавление задачи"));
@@ -15,6 +56,8 @@ AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
 
     groupsModel_ = new QStandardItemModel(this);
 
+    userGroups_ = get_groups_from_json(vk_query::groups_get(access_token, user_id));
+
     ui->listView->setModel(groupsModel_);
     ui->radioBtnList->toggle();
 }
@@ -24,12 +67,12 @@ AddTaskWindow::~AddTaskWindow()
     delete ui;
 }
 
-int AddTaskWindow::getInterval()
+int AddTaskWindow::getInterval() const
 {
     return ui->intervalSpinBox->value();
 }
 
-int AddTaskWindow::getPeriod()
+int AddTaskWindow::getPeriod() const
 {
     return ui->periodSpinBox->value();
 }
@@ -48,15 +91,29 @@ QVector<int> AddTaskWindow::getGroupsIndexes() const
     return indexes;
 }
 
-QStringList AddTaskWindow::getGroups() const
+QStringList AddTaskWindow::getGroupsNames() const
 {
     QVector<int> indexes = getGroupsIndexes();
     QStringList result;
     result.reserve(indexes.size());
 
     std::transform(indexes.cbegin(), indexes.cend(), std::back_inserter(result),
-    [this](int indx){
-        return userGroups_.at(indx);
+    [this](auto indx){
+        return (currentList_.at(indx))->name;
+    });
+
+    return result;
+}
+
+QStringList AddTaskWindow::getGroupsIds() const
+{
+    QVector<int> indexes = getGroupsIndexes();
+    QStringList result;
+    result.reserve(indexes.size());
+
+    std::transform(indexes.cbegin(), indexes.cend(), std::back_inserter(result),
+    [this](auto indx){
+        return (currentList_.at(indx))->id;
     });
 
     return result;
@@ -79,13 +136,7 @@ void AddTaskWindow::on_radioBtnList_toggled(bool checked)
 
     currentList_ = userGroups_;
 
-    for(const auto& group : currentList_)
-    {
-        QStandardItem* tmp = new QStandardItem(group);
-        tmp->setCheckable(true);
-        tmp->setEditable(false);
-        groupsModel_->appendRow(tmp);
-    }
+    updateItems();
 
     ui->buttonBox->setEnabled(true);
 }
@@ -105,23 +156,35 @@ void AddTaskWindow::on_radioBtnFile_toggled(bool checked)
         tr("Open text file"), QDir::currentPath(), tr("Text files (*.txt)"));
 
     QFile file(filename);
-
     if(!file.open(QIODevice::ReadOnly))
     {
         QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось открыть файл!"));
         this->close();
     }
 
-    currentList_ = QString(file.readAll()).split("\r\n");
+    QStringList lst = QString(file.readAll()).split("\r\n");
 
-    for(const auto& group : currentList_)
+    currentList_.clear();
+    currentList_.reserve(lst.size());
+
+    std::transform(std::cbegin(lst), std::cend(lst), std::back_inserter(currentList_),
+    [](const auto& gr)
     {
-        QStandardItem* tmp = new QStandardItem(group);
-        tmp->setCheckable(true);
-        tmp->setEditable(false);
-        tmp->setCheckState(Qt::Checked);
-        groupsModel_->appendRow(tmp);
-    }
+        return std::make_shared<Group>(gr, gr);
+    });
+
+    updateItems();
 
     this->setEnabled(true);
+}
+
+void AddTaskWindow::updateItems()
+{
+    std::for_each(std::cbegin(currentList_), std::cend(currentList_), [this](const auto& gr)
+    {
+        QStandardItem* tmp = new QStandardItem(gr->name);
+        tmp->setCheckable(true);
+        tmp->setEditable(false);
+        this->groupsModel_->appendRow(tmp);
+    });
 }

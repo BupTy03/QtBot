@@ -2,6 +2,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <vector>
+#include <utility>
+
 #include <QMainWindow>
 #include <QWebEngineView>
 #include <QMessageBox>
@@ -23,6 +26,7 @@ struct User
     QString name;
     QString access_token;
 };
+
 
 class MainWindow : public QMainWindow
 {
@@ -48,6 +52,7 @@ private:
     const QString app_id_{"6667132"};
     const QString scope_{"270336"}; //   331776   266240
     QVector<QPair<QString, QString>> groups_;
+    QVector<std::shared_ptr<User>> users_;
     QThread* secondThread_;
 };
 
