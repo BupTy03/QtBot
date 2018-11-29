@@ -40,19 +40,19 @@ private slots:
 
     void on_NewTaskAction_triggered();
 
-    void on_LoginAction_triggered();
-
     void checkLogin(bool success);
 
-    void on_TokenAction_triggered();
+    void on_AddUser_triggered();
+
+    void on_ChangeUserCB_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;
     VKAuth* vkAuth_;
     const QString app_id_{"6667132"};
     const QString scope_{"270336"}; //   331776   266240
-    QVector<QPair<QString, QString>> groups_;
-    QVector<std::shared_ptr<User>> users_;
+    QJsonArray users_;
+    int currentUser;
     QThread* secondThread_;
 };
 

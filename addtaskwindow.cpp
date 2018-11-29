@@ -25,24 +25,6 @@ QVector<std::shared_ptr<Group>> get_groups_from_json(const QJsonDocument& docume
     return groups;
 }
 
-//AddTaskWindow::AddTaskWindow(const QStringList& groups, QWidget *parent) :
-//    QDialog(parent),
-//    ui(new Ui::AddTaskWindow),
-//    userGroups_(groups)
-//{
-//    ui->setupUi(this);
-//    this->setWindowTitle(tr("Добавление задачи"));
-//    this->setWindowFlags (this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-
-//    ui->intervalSpinBox->setRange(1, 10000);
-//    ui->periodSpinBox->setRange(1, 18000);
-
-//    groupsModel_ = new QStandardItemModel(this);
-
-//    ui->listView->setModel(groupsModel_);
-//    ui->radioBtnList->toggle();
-//}
-
 AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::AddTaskWindow)

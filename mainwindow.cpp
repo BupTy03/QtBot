@@ -16,6 +16,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     vkAuth_ = new VKAuth(app_id_, this);
 
+    QFile file("users.json");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    users_ = (QJsonDocument::fromJson(file.readAll())).array();
+    file.close();
+
+    std::for_each(users_.constBegin(), users_.constEnd(), [this](auto item){
+        ui->ChangeUserCB->addItem((item["name"]).toString());
+    });
+
+    bool is_empty = users_.empty();
+
+    currentUser = (is_empty) ? -1 : 0;
+
+    ui->NewTaskBtn->setVisible(!is_empty);
+    ui->NewTaskAction->setDisabled(is_empty);
+
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
@@ -24,15 +40,11 @@ MainWindow::MainWindow(QWidget *parent) :
     (scrollWidget->layout())->setAlignment(Qt::AlignTop);
     ui->scrollArea->setWidget(scrollWidget);
 
-    QObject::connect(ui->LoginBtn, &QPushButton::released, ui->LoginAction, &QAction::trigger);
+    QObject::connect(ui->AddUserPB, &QPushButton::released, ui->AddUser, &QAction::trigger);
     QObject::connect(ui->ExitBtn, &QPushButton::released, ui->ExitAction, &QAction::trigger);
     QObject::connect(ui->NewTaskBtn, &QPushButton::released, ui->NewTaskAction, &QAction::trigger);
 
     QObject::connect(vkAuth_, &VKAuth::done, this, &MainWindow::checkLogin);
-
-    ui->NewTaskBtn->hide();
-    ui->NewTaskAction->setDisabled(true);
-    ui->TokenAction->setDisabled(true);
 
     secondThread_ = new QThread(this);
     secondThread_->start();
@@ -51,35 +63,19 @@ void MainWindow::on_ExitAction_triggered()
 
 void MainWindow::on_NewTaskAction_triggered()
 {
-    QStringList groups_names_;
-    groups_names_.reserve(groups_.size());
+    if(currentUser < 0)
+    {
+        return;
+    }
 
-    std::transform(groups_.cbegin(), groups_.cend(), std::back_inserter(groups_names_),
-    [](const auto& p){
-        return p.second;
-    });
-
-    AddTaskWindow addTskWin(vkAuth_->get_access_token(), vkAuth_->get_user_id());
+    AddTaskWindow addTskWin((users_.at(currentUser))["access_token"].toString(),
+            QString::number((users_.at(currentUser))["id"].toInt()) /*vkAuth_->get_access_token(), vkAuth_->get_user_id()*/);
     addTskWin.setModal(true);
 
     if(!addTskWin.exec())
     {
         return;
     }
-
-//    auto groupsIndexes = addTskWin.getGroupsIndexes();
-//    QStringList groups_names;
-//    QStringList groups_ids;
-
-//    groups_names.reserve(groupsIndexes.size());
-//    groups_ids.reserve(groupsIndexes.size());
-
-//    for(auto index : groupsIndexes)
-//    {
-//        const auto& group = groups_.at(index);
-//        groups_names.push_back(group.second);
-//        groups_ids.push_back(group.first);
-//    }
 
     Task* curr_task = new Task(vkAuth_->get_access_token(),
                                addTskWin.getGroupsIds(),
@@ -94,47 +90,24 @@ void MainWindow::on_NewTaskAction_triggered()
     curr_task->moveToThread(secondThread_);
 }
 
-void MainWindow::on_LoginAction_triggered()
-{
-    ui->LoginAction->setDisabled(true);
-    ui->LoginBtn->setDisabled(true);
-    vkAuth_->auth(scope_);
-    ui->TokenAction->setEnabled(true);
-}
-
 void MainWindow::checkLogin(bool success)
 {
     if(!success)
     {
-        ui->LoginAction->setEnabled(true);
-        ui->LoginBtn->setEnabled(true);
         QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
         return;
     }
-    ui->LoginBtn->hide();
 
     ui->NewTaskBtn->show();
     ui->NewTaskAction->setEnabled(true);
-
-    //groups_ = get_groups_from_json(vk_query::groups_get(vkAuth_->get_access_token(), vkAuth_->get_user_id()));
-
-#if 0
-    qDebug() << "\n\n===================================Groups list=====================================";
-    std::transform(std::cbegin(groups_), std::cend(groups_), std::ostream_iterator<std::string>(std::cout, "\n"),
-    [](const QPair<QString, QString>& p)
-    {
-         QString result;
-         result.push_back("Id of group: ");
-         result.push_back(p.first);
-         result.push_back("\nName of group: ");
-         result.push_back(p.second);
-         return result.toStdString();
-    });
-    qDebug() << "===================================End of list=====================================";
-#endif
 }
 
-void MainWindow::on_TokenAction_triggered()
+void MainWindow::on_AddUser_triggered()
 {
     vkAuth_->reauth(scope_);
+}
+
+void MainWindow::on_ChangeUserCB_currentIndexChanged(int index)
+{
+    currentUser = index;
 }

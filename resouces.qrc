@@ -4,5 +4,7 @@
         <file>img/exit.png</file>
         <file>img/newTask.png</file>
         <file>img/update.png</file>
+        <file>img/changeUser.png</file>
+        <file>img/addUser2.png</file>
     </qresource>
 </RCC>

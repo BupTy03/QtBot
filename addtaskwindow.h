@@ -36,7 +36,6 @@ class AddTaskWindow : public QDialog
     Q_OBJECT
 
 public:
-    //explicit AddTaskWindow(const QStringList& groups,  QWidget* parent = nullptr);
     explicit AddTaskWindow(const QString& access_token, const QString& user_id, QWidget* parent = nullptr);
     ~AddTaskWindow();
 
