@@ -24,8 +24,6 @@ void VKAuth::auth(QString scope)
 #ifdef DEBUG
     qDebug() << "Url:" << url.toString();
 #endif
-    //((browser_.page())->profile())->setHttpCacheType(QWebEngineProfile::NoCache);
-    //((browser_.page())->profile())->setPersistentCookiesPolicy(QWebEngineProfile::NoPersistentCookies);
     browser_.load(url);
     blockSignals(false);
     browser_.show();
@@ -35,9 +33,6 @@ void VKAuth::reauth(QString scope)
 {
     (((browser_.page())->profile())->cookieStore())->deleteAllCookies();
     ((browser_.page())->profile())->clearHttpCache();
-    //((browser_.page())->profile())->setHttpCacheType(QWebEngineProfile::NoCache);
-    //((browser_.page())->profile())->setPersistentCookiesPolicy(QWebEngineProfile::NoPersistentCookies);
-
     auth(scope);
 }
 
@@ -62,6 +57,7 @@ void VKAuth::checkAuth(const QUrl& url)
         qDebug() << "access_token = " << accessToken_;
 #endif
     }
+    else return;
 
     browser_.close();
     emit done(this->isValid());

@@ -23,7 +23,7 @@ Task::Task(QString&& access_token, QStringList&& groups, QString&& message, int 
       accessToken_(std::move(access_token)),
       message_(std::move(message)),
       active_(true),
-      interval_(interval*1000),
+      interval_(interval),
       period_(period)
 {
     startTimer(period_*1000);
@@ -39,7 +39,7 @@ void Task::timerEvent(QTimerEvent* /*event*/)
     for(const auto& groupId : groupsIds_)
     {
         vk_query::wall_post_to_group(accessToken_, groupId, message_);
-        (this->thread())->msleep(static_cast<unsigned long>(interval_));
+        (this->thread())->msleep(static_cast<unsigned long>(interval_*1000));
     }
 }
 

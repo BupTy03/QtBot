@@ -21,9 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
     users_ = (QJsonDocument::fromJson(file.readAll())).array();
     file.close();
 
-    std::for_each(users_.constBegin(), users_.constEnd(), [this](auto item){
-        ui->ChangeUserCB->addItem((item["name"]).toString());
-    });
+    updateUsersComboBox();
+
+//    std::for_each(users_.constBegin(), users_.constEnd(),
+//    [this](auto item){
+//        ui->ChangeUserCB->addItem((item["name"]).toString());
+//    });
 
     bool is_empty = users_.empty();
 
@@ -58,7 +61,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_ExitAction_triggered()
 {
-    QApplication::quit();
+    close();
 }
 
 void MainWindow::on_NewTaskAction_triggered()
@@ -69,7 +72,7 @@ void MainWindow::on_NewTaskAction_triggered()
     }
 
     AddTaskWindow addTskWin((users_.at(currentUser))["access_token"].toString(),
-            QString::number((users_.at(currentUser))["id"].toInt()) /*vkAuth_->get_access_token(), vkAuth_->get_user_id()*/);
+            QString::number((users_.at(currentUser))["id"].toInt()));
     addTskWin.setModal(true);
 
     if(!addTskWin.exec())
@@ -77,7 +80,7 @@ void MainWindow::on_NewTaskAction_triggered()
         return;
     }
 
-    Task* curr_task = new Task(vkAuth_->get_access_token(),
+    Task* curr_task = new Task(((users_.at(currentUser))["access_token"]).toString(),
                                addTskWin.getGroupsIds(),
                                addTskWin.getMessage(),
                                addTskWin.getInterval(),
@@ -98,6 +101,7 @@ void MainWindow::checkLogin(bool success)
         return;
     }
 
+    addNewUser(vkAuth_->get_user_id(), vkAuth_->get_access_token());
     ui->NewTaskBtn->show();
     ui->NewTaskAction->setEnabled(true);
 }
@@ -110,4 +114,50 @@ void MainWindow::on_AddUser_triggered()
 void MainWindow::on_ChangeUserCB_currentIndexChanged(int index)
 {
     currentUser = index;
+}
+
+QString MainWindow::user_name_from_json(const QJsonDocument& doc) const
+{
+    qDebug() << doc;
+    QJsonArray arr = doc["response"].toArray();
+    if(arr.empty())
+    {
+        return QString();
+    }
+
+    QJsonObject usr = (arr.first()).toObject();
+
+    return (((usr["first_name"]).toString()).append(" ")).append(usr["last_name"].toString());
+}
+
+void MainWindow::addNewUser(const QString& id, const QString& access_token)
+{
+    QJsonObject usr;
+    usr["access_token"] = access_token;
+    usr["id"] = id.toInt();
+    usr["name"] = user_name_from_json(vk_query::get_user_name(vkAuth_->get_user_id(), vkAuth_->get_access_token()));
+    users_.append(usr);
+    updateUsersComboBox();
+}
+
+void MainWindow::updateUsersComboBox()
+{
+    ui->ChangeUserCB->clear();
+    std::for_each(users_.constBegin(), users_.constEnd(),
+    [this](auto item)
+    {
+        ui->ChangeUserCB->addItem((item["name"]).toString());
+    });
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    QFile file("users.json");
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        return;
+    }
+    file.write((QJsonDocument(users_)).toJson());
+    file.close();
+    QApplication::quit();
 }

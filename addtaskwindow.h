@@ -28,9 +28,6 @@ struct Group
     QString name;
 };
 
-QVector<std::shared_ptr<Group>> get_groups_from_json(const QJsonDocument& document);
-
-
 class AddTaskWindow : public QDialog
 {
     Q_OBJECT
@@ -41,7 +38,7 @@ public:
 
     int getInterval() const;
     int getPeriod() const;
-    QVector<int> getGroupsIndexes() const;
+    std::vector<int> getGroupsIndexes() const;
     QStringList getGroupsIds() const;
     QStringList getGroupsNames() const;
     QString getMessage() const;
@@ -53,12 +50,14 @@ private slots:
 
 private:
     void updateItems();
+    std::vector<Group> getGroupsFromJson(const QJsonDocument& document) const;
+    std::vector<Group> readGroupsFromFile(const QString& filename);
 
 private:
     Ui::AddTaskWindow *ui;
     QStandardItemModel* groupsModel_;
-    QVector<std::shared_ptr<Group>> userGroups_;
-    QVector<std::shared_ptr<Group>> currentList_;
+    const std::vector<Group> userGroups_;
+    std::vector<Group> currentList_;
 };
 
 #endif // ADDTASKWINDOW_H

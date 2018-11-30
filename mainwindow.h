@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget* parent = nullptr);
-    ~MainWindow();
+    virtual ~MainWindow() override;
 
 private slots:
     void on_ExitAction_triggered();
@@ -47,10 +47,17 @@ private slots:
     void on_ChangeUserCB_currentIndexChanged(int index);
 
 private:
+    QString user_name_from_json(const QJsonDocument& doc) const;
+    void addNewUser(const QString& id, const QString& access_token);
+    void updateUsersComboBox();
+
+    virtual void closeEvent(QCloseEvent* event) override;
+
+private:
     Ui::MainWindow *ui;
     VKAuth* vkAuth_;
     const QString app_id_{"6667132"};
-    const QString scope_{"270336"}; //   331776   266240
+    const QString scope_{"335872"}; // 270336  331776   266240
     QJsonArray users_;
     int currentUser;
     QThread* secondThread_;

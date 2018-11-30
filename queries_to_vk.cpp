@@ -93,3 +93,21 @@ QJsonDocument vk_query::wall_post_to_group(const QString& access_token, const QS
 
     return get_request(QNetworkRequest(request), wait_time);
 }
+
+QJsonDocument vk_query::get_user_name(const QString& user_id, const QString& access_token, int wait_time)
+{
+    QUrl request("https://api.vk.com/method/users.get");
+
+    QUrlQuery query(request);
+    query.addQueryItem("user_id", user_id);
+    query.addQueryItem("access_token", access_token);
+    query.addQueryItem("v", "5.52");
+
+    request.setQuery(query);
+
+#ifdef DEBUG
+    qDebug() << "Final request: " << request.toString();
+#endif
+
+    return get_request(QNetworkRequest(request), wait_time);
+}
