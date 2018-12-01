@@ -1,5 +1,7 @@
 #include "taskwidget.h"
 
+#include <QStandardItem>
+
 TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* parent) : QWidget(parent)
 {
     this->setMinimumHeight(210);

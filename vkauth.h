@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QString>
 #include <QtWebEngineWidgets>
+#include <QUrl>
 
 #define DEBUG
 

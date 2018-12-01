@@ -2,12 +2,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <vector>
-#include <utility>
-
 #include <QMainWindow>
-#include <QWebEngineView>
-#include <QMessageBox>
+#include <QString>
+#include <QThread>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QCloseEvent>
 
 #include "addtaskwindow.h"
 #include "task.h"
@@ -20,8 +20,11 @@ class MainWindow;
 
 struct User
 {
+    User(){}
+
     User(QString id, QString name, QString access_token)
         : id(std::move(id)), name(std::move(name)), access_token(std::move(access_token)){}
+
     QString id;
     QString name;
     QString access_token;

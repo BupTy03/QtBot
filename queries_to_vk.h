@@ -2,17 +2,9 @@
 #ifndef QUERIES_TO_VK_H
 #define QUERIES_TO_VK_H
 
-#include <QObject>
-#include <QNetworkAccessManager>
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QUrl>
-#include <QUrlQuery>
+#include <QString>
+#include <QNetworkRequest>
 #include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QTimer>
 
 #define DEBUG
 

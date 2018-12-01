@@ -5,7 +5,7 @@
 #include "task.h"
 
 #include <QtWidgets>
-#include <QStandardItem>
+#include <QStringList>
 #include <QStandardItemModel>
 
 class TaskWidget : public QWidget

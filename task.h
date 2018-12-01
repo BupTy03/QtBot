@@ -3,6 +3,9 @@
 #define TASK_H
 
 #include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QTimerEvent>
 
 #include "vkauth.h"
 #include "queries_to_vk.h"

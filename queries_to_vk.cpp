@@ -1,5 +1,17 @@
 #include "queries_to_vk.h"
 
+#include <QObject>
+#include <QNetworkAccessManager>
+#include <QEventLoop>
+#include <QNetworkReply>
+#include <QUrl>
+#include <QUrlQuery>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QTimer>
+
 #include <cmath>
 
 QJsonDocument vk_query::get_request(const QNetworkRequest& request, int remaining_time)

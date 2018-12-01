@@ -1,8 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <iostream>
-#include <string>
+#include <QApplication>
+#include <QtWidgets>
+#include <QAction>
+#include <QMessageBox>
+#include <QJsonObject>
+#include <QFile>
+
 #include <algorithm>
 
 #include "queries_to_vk.h"
@@ -22,11 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     file.close();
 
     updateUsersComboBox();
-
-//    std::for_each(users_.constBegin(), users_.constEnd(),
-//    [this](auto item){
-//        ui->ChangeUserCB->addItem((item["name"]).toString());
-//    });
 
     bool is_empty = users_.empty();
 

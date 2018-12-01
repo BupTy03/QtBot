@@ -1,5 +1,8 @@
 #include "vkauth.h"
 
+#include <QUrlQuery>
+#include <QRegExp>
+
 VKAuth::VKAuth(QString appID, QObject* parent) : QObject(parent), appID_(std::move(appID))
 {
     QObject::connect(&browser_, &QWebEngineView::urlChanged, this, &VKAuth::checkAuth);
