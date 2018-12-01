@@ -7,24 +7,24 @@ Task::Task(const QString& access_token,
            int period,
            QObject* parent)
     : QObject(parent),
+      active_{true},
+      interval_{interval},
+      period_{period},
       groupsIds_(groups),
       accessToken_(access_token),
-      message_(message),
-      active_(true),
-      interval_(interval),
-      period_(period)
+      message_(message)
 {
     startTimer(period_*1000);
 }
 
 Task::Task(QString&& access_token, QStringList&& groups, QString&& message, int interval, int period, QObject *parent)
     : QObject(parent),
+      active_{true},
+      interval_{interval},
+      period_{period},
       groupsIds_(std::move(groups)),
       accessToken_(std::move(access_token)),
-      message_(std::move(message)),
-      active_(true),
-      interval_(interval),
-      period_(period)
+      message_(std::move(message))
 {
     startTimer(period_*1000);
 }

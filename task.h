@@ -40,12 +40,12 @@ public slots:
     void stop();
 
 private:
+    bool active_{};
+    int interval_{};
+    int period_{};
     QStringList groupsIds_;
     QString accessToken_;
     QString message_;
-    bool active_;
-    int interval_;
-    int period_;
 };
 
 #endif // TASK_H

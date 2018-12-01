@@ -57,13 +57,13 @@ private:
     virtual void closeEvent(QCloseEvent* event) override;
 
 private:
-    Ui::MainWindow *ui;
-    VKAuth* vkAuth_;
+    Ui::MainWindow *ui{nullptr};
+    VKAuth* vkAuth_{nullptr};
+    int currentUser{};
+    QThread* secondThread_{nullptr};
     const QString app_id_{"6667132"};
     const QString scope_{"335872"}; // 270336  331776   266240
-    QJsonArray users_;
-    int currentUser;
-    QThread* secondThread_;
+    QJsonArray users_{};
 };
 
 #endif // MAINWINDOW_H

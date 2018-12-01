@@ -64,6 +64,5 @@ void VKAuth::checkAuth(const QUrl& url)
 
     browser_.close();
     emit done(this->isValid());
-    //blockSignals(true);
 }
 
