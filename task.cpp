@@ -1,5 +1,7 @@
 #include "task.h"
 
+#include <QTimerEvent>
+
 Task::Task(const QString& access_token,
            const QStringList& groups,
            const QString& message,
@@ -14,6 +16,7 @@ Task::Task(const QString& access_token,
       accessToken_(access_token),
       message_(message)
 {
+    this->timerEvent(new QTimerEvent(0));
     startTimer(period_*1000);
 }
 
@@ -26,6 +29,7 @@ Task::Task(QString&& access_token, QStringList&& groups, QString&& message, int 
       accessToken_(std::move(access_token)),
       message_(std::move(message))
 {
+    this->timerEvent(new QTimerEvent(0));
     startTimer(period_*1000);
 }
 

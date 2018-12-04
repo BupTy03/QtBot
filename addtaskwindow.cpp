@@ -9,6 +9,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include <QDebug>
+
 #include <utility>
 #include <algorithm>
 
@@ -175,12 +177,19 @@ QSharedPointer<QVector<Group>> AddTaskWindow::getGroupsFromJson(const QJsonDocum
 
     QJsonArray items = response["items"].toArray();
 
+    qDebug() << "==================Groups loaded==================";
+
     std::transform(std::cbegin(items), std::cend(items),
                    std::back_inserter(*groups),
     [](auto json_val)
     {
+        qDebug() << "GroupID: " << QString::number(json_val["id"].toInt());
+        qDebug() << "GroupName: " << json_val["name"].toString();
+        qDebug();
         return Group(QString::number(json_val["id"].toInt()), json_val["name"].toString());
     });
+
+    qDebug() << "=================================================";
 
     return groups;
 }
