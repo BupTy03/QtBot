@@ -123,3 +123,61 @@ QJsonDocument vk_query::get_user_name(const QString& user_id, const QString& acc
 
     return get_request(QNetworkRequest(request), wait_time);
 }
+
+
+QJsonDocument vk_query::photos_get_wall_upload_server(const QString& access_token, const QString& group_id, int wait_time)
+{
+    QUrl request("https://api.vk.com/method/photos.saveWallPhoto");
+
+    QUrlQuery query(request);
+    query.addQueryItem("access_token", access_token);
+    query.addQueryItem("group_id", group_id);
+    query.addQueryItem("v", "5.52");
+
+    request.setQuery(query);
+
+#ifdef DEBUG
+    qDebug() << "Final request: " << request.toString();
+#endif
+
+    return get_request(QNetworkRequest(request), wait_time);
+}
+
+QJsonDocument vk_query::photos_save_wall_photo(const QString& access_token, const QString& group_id, const QString& photo, const QString& server, const QString& hash, int wait_time)
+{
+    QUrl request("https://api.vk.com/method/photos.getWallUploadServer");
+
+    QUrlQuery query(request);
+    query.addQueryItem("access_token", access_token);
+    query.addQueryItem("group_id", group_id);
+    query.addQueryItem("photo", photo);
+    query.addQueryItem("server", server);
+    query.addQueryItem("hash", hash);
+    query.addQueryItem("v", "5.52");
+
+    request.setQuery(query);
+
+#ifdef DEBUG
+    qDebug() << "Final request: " << request.toString();
+#endif
+
+    return get_request(QNetworkRequest(request), wait_time);
+}
+
+QJsonDocument vk_query::custom_get(QUrl url, const QMap<QString, QString>& params, int wait_time)
+{
+    QUrlQuery query(url);
+
+    for(auto it = params.constBegin(); it != params.constEnd(); ++it)
+    {
+        query.addQueryItem(it.key(), it.value());
+    }
+
+    url.setQuery(query);
+
+#ifdef DEBUG
+    qDebug() << "Final request: " << url.toString();
+#endif
+
+    return get_request(QNetworkRequest(url), wait_time);
+}
