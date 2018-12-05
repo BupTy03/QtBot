@@ -21,31 +21,33 @@ public:
                   int period,
                   QObject* parent = nullptr);
 
-    explicit Task(QString&& access_token,
-                  QStringList&& groups,
-                  QString&& message,
-                  int interval,
-                  int period,
-                  QObject* parent = nullptr);
-
     virtual void timerEvent(QTimerEvent* /*event*/) override;
 
     const QStringList& groupsIds() const;
-    QString getMessage() const;
+    const QString& getMessage() const;
     int getInterval() const;
     int getPeriod() const;
+
+    void setImgPath(const QString& img_path);
 
 public slots:
     void start();
     void stop();
+    void go();
+
+private:
+    QJsonDocument loadImage(const QString& group_id) const;
+    QJsonDocument saveImage(const QString& group_id, const QJsonDocument& load_ans) const;
+    void postToWall(const QString& group_id) const;
 
 private:
     bool active_{};
     int interval_{};
     int period_{};
-    QStringList groupsIds_;
     QString accessToken_;
     QString message_;
+    QString imgPath_;
+    QStringList groupsIds_;
 };
 
 #endif // TASK_H

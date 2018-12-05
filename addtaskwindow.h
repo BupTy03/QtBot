@@ -39,12 +39,17 @@ public:
     QStringList getGroupsIds() const;
     QStringList getGroupsNames() const;
     QString getMessage() const;
+    bool hasImage() const;
+    QString getImgPath() const;
 
 private slots:
     void on_radioBtnList_toggled(bool checked);
 
     void on_radioBtnFile_toggled(bool checked);
 
+    void on_loadImageBtn_clicked();
+
+    void updateLoadImg();
 private:
     void updateItems();
     bool areAllItemsUnchecked();
@@ -59,6 +64,12 @@ private:
     QStandardItemModel* groupsModel_;
     QSharedPointer<QVector<Group>> userGroups_;
     QSharedPointer<QVector<Group>> currentList_;
+    QString imgPath_;
+    QPixmap loadImg_;
+
+    // QWidget interface
+protected:
+    virtual void resizeEvent(QResizeEvent* event) override;
 };
 
 #endif // ADDTASKWINDOW_H

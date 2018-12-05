@@ -8,6 +8,8 @@
 #include <QStandardItem>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QSize>
+#include <QResizeEvent>
 
 #include <QDebug>
 
@@ -25,7 +27,7 @@ QSharedPointer<T> makeQSharedPointer(Ts&&... params)
 AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::AddTaskWindow),
-    userGroups_(getGroupsFromJson(vk_query::groups_get(access_token, user_id)))
+    userGroups_(getGroupsFromJson(VkQuery::groupsGet(access_token, user_id)))
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Добавление задачи"));
@@ -36,6 +38,8 @@ AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id
 
     groupsModel_ = new QStandardItemModel(this);
     ui->listView->setModel(groupsModel_);
+
+    ui->loadImageLabel->hide();
 
     if(userGroups_->empty())
     {
@@ -108,6 +112,16 @@ QString AddTaskWindow::getMessage() const
     return ui->textMessage->toPlainText();
 }
 
+bool AddTaskWindow::hasImage() const
+{
+    return !imgPath_.isEmpty();
+}
+
+QString AddTaskWindow::getImgPath() const
+{
+    return imgPath_;
+}
+
 void AddTaskWindow::on_radioBtnList_toggled(bool checked)
 {
     if(!checked)
@@ -129,7 +143,7 @@ void AddTaskWindow::on_radioBtnFile_toggled(bool checked)
     this->setDisabled(true);
 
     currentList_ = readGroupsFromFile(QFileDialog::getOpenFileName(this,
-                                     tr("Open text file"), QDir::currentPath(), tr("Json files (*.json)")));
+                                     tr("Открыть файл JSON"), QDir::currentPath(), tr("Json files (*.json)")));
 
     this->setEnabled(true);
 
@@ -222,3 +236,34 @@ int AddTaskWindow::exec()
     return (areAllItemsUnchecked()) ? QDialog::Rejected : result;
 }
 
+void AddTaskWindow::resizeEvent(QResizeEvent* event)
+{
+    if(ui->loadImageLabel->isVisible() && !loadImg_.isNull())
+    {
+        updateLoadImg();
+    }
+}
+
+void AddTaskWindow::on_loadImageBtn_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("Загрузить изображение"),
+                                                    QDir::currentPath(),
+                                                    tr("Images (*.jpg)"));
+    if(!loadImg_.load(filename))
+    {
+        QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка чтения файла!"));
+        return;
+    }
+
+    imgPath_ = filename;
+
+    ui->loadImageLabel->show();
+    updateLoadImg();
+}
+
+void AddTaskWindow::updateLoadImg()
+{
+    QSize sz = ui->loadImageLabel->size();
+    ui->loadImageLabel->setPixmap(loadImg_.scaled(sz.width(), sz.height(), Qt::KeepAspectRatio));
+}

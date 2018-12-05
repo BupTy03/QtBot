@@ -86,10 +86,16 @@ void MainWindow::on_NewTaskAction_triggered()
                                addTskWin.getInterval(),
                                addTskWin.getPeriod());
 
+    if(addTskWin.hasImage())
+    {
+        curr_task->setImgPath(addTskWin.getImgPath());
+    }
+
     TaskWidget* widget = new TaskWidget(curr_task, addTskWin.getGroupsNames());
 
     (((ui->scrollArea)->widget())->layout())->addWidget(widget);
 
+    curr_task->go();
     curr_task->moveToThread(secondThread_);
 }
 
@@ -116,7 +122,7 @@ void MainWindow::on_ChangeUserCB_currentIndexChanged(int index)
     currentUser = index;
 }
 
-QString MainWindow::user_name_from_json(const QJsonDocument& doc) const
+QString MainWindow::userNameFromJson(const QJsonDocument& doc) const
 {
     qDebug() << doc;
     QJsonArray arr = doc["response"].toArray();
@@ -135,7 +141,7 @@ void MainWindow::addNewUser(const QString& id, const QString& access_token)
     QJsonObject usr;
     usr["access_token"] = access_token;
     usr["id"] = id.toInt();
-    usr["name"] = user_name_from_json(vk_query::get_user_name(vkAuth_->get_user_id(), vkAuth_->get_access_token()));
+    usr["name"] = userNameFromJson(VkQuery::getUserName(vkAuth_->get_user_id(), vkAuth_->get_access_token()));
     users_.append(usr);
     updateUsersComboBox();
 }

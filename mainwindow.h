@@ -50,7 +50,7 @@ private slots:
     void on_ChangeUserCB_currentIndexChanged(int index);
 
 private:
-    QString user_name_from_json(const QJsonDocument& doc) const;
+    QString userNameFromJson(const QJsonDocument& doc) const;
     void addNewUser(const QString& id, const QString& access_token);
     void updateUsersComboBox();
 
@@ -62,8 +62,11 @@ private:
     int currentUser{};
     QThread* secondThread_{nullptr};
     const QString app_id_{"6667132"};
-    const QString scope_{"335872"}; // 270336  331776   266240
-    QJsonArray users_{};
+    const QString scope_{"335876"}; // +4(photos)
+                                    // +8192(wall)
+                                    // +65536(offline)
+                                    // +262144(groups) = 335876
+    QJsonArray users_;
 };
 
 #endif // MAINWINDOW_H
