@@ -37,7 +37,7 @@ public slots:
 
 private:
     QJsonDocument loadImage(const QString& group_id) const;
-    QJsonDocument saveImage(const QString& group_id, const QJsonDocument& load_ans) const;
+    QJsonDocument saveImage(const QString& group_id) const;
     void postToWall(const QString& group_id) const;
 
 private:

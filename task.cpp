@@ -28,9 +28,7 @@ void Task::timerEvent(QTimerEvent* /*event*/)
 
     for(const auto& groupId : groupsIds_)
     {
-        saveImage(groupId, loadImage(groupId));
-        //postToWall(groupId);
-        //VkQuery::wallPostToGroup(accessToken_, groupId, message_);
+        postToWall(groupId);
         (this->thread())->msleep(static_cast<unsigned long>(interval_*1000));
     }
 }
@@ -116,8 +114,10 @@ QJsonDocument Task::loadImage(const QString &group_id) const
     return result;
 }
 
-QJsonDocument Task::saveImage(const QString &group_id, const QJsonDocument& load_ans) const
+QJsonDocument Task::saveImage(const QString &group_id) const
 {
+    QJsonDocument load_ans = loadImage(group_id);
+
     QMap<QString, QString> params;
     params["group_id"] = group_id;
     params["photo"] = load_ans["photo"].toString();
@@ -126,13 +126,36 @@ QJsonDocument Task::saveImage(const QString &group_id, const QJsonDocument& load
     params["access_token"] = accessToken_;
     params["v"] = "5.52";
 
-    qDebug() << VkQuery::makeGetRequest(QUrl("https://api.vk.com/method/photos.saveWallPhoto"), params);
+    QJsonDocument result = VkQuery::makeGetRequest(QUrl("https://api.vk.com/method/photos.saveWallPhoto"), params);
 
-    return QJsonDocument();
+    qDebug() << result;
+
+    return result;
 }
 
 void Task::postToWall(const QString& group_id) const
 {
+    QJsonDocument save_ans = saveImage(group_id);
 
+    QJsonArray response = save_ans["response"].toArray();
+    if(response.isEmpty())
+    {
+        return;
+    }
 
+    QJsonObject image = (response.first()).toObject();
+
+    QUrl url("https://api.vk.com/method/wall.post");
+    QUrlQuery query(url);
+
+    query.addQueryItem("owner_id", QString("-").append(group_id));
+    query.addQueryItem("friends_only", "1");
+    query.addQueryItem("message", message_);
+    query.addQueryItem("attachments", QString("photo") + QString::number(image["owner_id"].toInt()).append("_") + QString::number(image["id"].toInt()));
+    query.addQueryItem("access_token", accessToken_);
+    query.addQueryItem("test_mode", "1");
+    query.addQueryItem("v", "5.52");
+
+    url.setQuery(query);
+    VkQuery::getRequest(QNetworkRequest(url));
 }
