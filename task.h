@@ -7,6 +7,9 @@
 #include <QStringList>
 #include <QTimerEvent>
 
+#include <memory>
+#include <tuple>
+
 #include "vkauth.h"
 #include "queries_to_vk.h"
 
@@ -28,7 +31,7 @@ public:
     int getInterval() const;
     int getPeriod() const;
 
-    void setImgPath(const QString& img_path);
+    bool attachPhoto(const QString& img_path);
 
 public slots:
     void start();
@@ -36,8 +39,7 @@ public slots:
     void go();
 
 private:
-    QJsonDocument loadImage(const QString& group_id) const;
-    QJsonDocument saveImage(const QString& group_id) const;
+    std::tuple<QString, QString, QString> uploadPhoto(const QString& group_id) const;
     void postToWall(const QString& group_id) const;
 
 private:
@@ -46,7 +48,7 @@ private:
     int period_{};
     QString accessToken_;
     QString message_;
-    QString imgPath_;
+    std::unique_ptr<QByteArray> photoAttachment_;
     QStringList groupsIds_;
 };
 

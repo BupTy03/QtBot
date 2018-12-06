@@ -9,8 +9,10 @@
 #include <QFile>
 
 #include <algorithm>
+#include <exception>
 
 #include "queries_to_vk.h"
+#include "myutils.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -66,7 +68,7 @@ void MainWindow::on_ExitAction_triggered()
 
 void MainWindow::on_NewTaskAction_triggered()
 {
-    if(currentUser < 0)
+    if(currentUser < 0 || currentUser >= users_.size())
     {
         return;
     }
@@ -77,6 +79,7 @@ void MainWindow::on_NewTaskAction_triggered()
 
     if(!addTskWin.exec())
     {
+        QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка добавления группы!"));
         return;
     }
 
@@ -88,12 +91,11 @@ void MainWindow::on_NewTaskAction_triggered()
 
     if(addTskWin.hasImage())
     {
-        curr_task->setImgPath(addTskWin.getImgPath());
+        curr_task->attachPhoto(addTskWin.getImgPath());
     }
 
-    TaskWidget* widget = new TaskWidget(curr_task, addTskWin.getGroupsNames());
-
-    (((ui->scrollArea)->widget())->layout())->addWidget(widget);
+    (((ui->scrollArea)->widget())->layout())
+            ->addWidget(new TaskWidget(curr_task, addTskWin.getGroupsNames()));
 
     curr_task->go();
     curr_task->moveToThread(secondThread_);
@@ -133,7 +135,9 @@ QString MainWindow::userNameFromJson(const QJsonDocument& doc) const
 
     QJsonObject usr = (arr.first()).toObject();
 
-    return (((usr["first_name"]).toString()).append(" ")).append(usr["last_name"].toString());
+    return (((usr["first_name"]).toString())
+            .append(" "))
+            .append(usr["last_name"].toString());
 }
 
 void MainWindow::addNewUser(const QString& id, const QString& access_token)
@@ -141,7 +145,18 @@ void MainWindow::addNewUser(const QString& id, const QString& access_token)
     QJsonObject usr;
     usr["access_token"] = access_token;
     usr["id"] = id.toInt();
-    usr["name"] = userNameFromJson(VkQuery::getUserName(vkAuth_->get_user_id(), vkAuth_->get_access_token()));
+
+    try
+    {
+        usr["name"] = userNameFromJson(VkQuery::getUserName(vkAuth_->get_user_id(),
+                                                            vkAuth_->get_access_token()));
+    }
+    catch (const std::exception& e)
+    {
+        usr["name"] = id;
+        Log::toFile(e.what());
+    }
+
     users_.append(usr);
     updateUsersComboBox();
 }

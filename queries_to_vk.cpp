@@ -11,25 +11,69 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QTimer>
+#include <QScopedPointer>
 
 #include <cmath>
+#include <memory>
+#include <exception>
 
 QJsonDocument VkQuery::getRequest(const QNetworkRequest& request, int remaining_time)
 {
-    QNetworkAccessManager manager;
-    QEventLoop loop;
-    QTimer timer;
+    if(!(request.url()).isValid())
+    {
+        throw std::runtime_error{"in function VkQuery::getRequest(): invalid url"};
+    }
 
-    QObject::connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    auto manager = std::make_unique<QNetworkAccessManager>();
+    auto loop = std::make_unique<QEventLoop>();
+    auto timer = std::make_unique<QTimer>();
 
-    timer.start(abs(remaining_time));
-    QNetworkReply* reply = manager.get(request);
-    loop.exec();
-    return QJsonDocument::fromJson(reply->readAll());
+    QObject::connect(manager.get(), &QNetworkAccessManager::finished, loop.get(), &QEventLoop::quit);
+    QObject::connect(timer.get(), &QTimer::timeout, loop.get(), &QEventLoop::quit);
+
+    timer->start(abs(remaining_time));
+    std::unique_ptr<QNetworkReply> reply(manager->get(request));
+    loop->exec();
+
+    if(reply->error() != QNetworkReply::NoError)
+    {
+        throw std::runtime_error{"in function VkQuery::getRequest(): network error\n"};
+    }
+
+    auto result = QJsonDocument::fromJson(reply->readAll());
+    checkForErrors(result, "VkQuery::getRequest()");
+    return result;
 }
 
-QJsonDocument VkQuery::groupsGet(const QString& access_token, const QString& user_id, int wait_time)
+QJsonDocument VkQuery::postRequest(const QNetworkRequest& request, QHttpMultiPart* mul_part, int remaining_time)
+{
+    if(!(request.url()).isValid())
+    {
+        throw std::runtime_error{"in function VkQuery::postRequest(): invalid url"};
+    }
+
+    auto manager = std::make_unique<QNetworkAccessManager>();
+    auto loop = std::make_unique<QEventLoop>();
+    auto timer = std::make_unique<QTimer>();
+
+    QObject::connect(manager.get(), &QNetworkAccessManager::finished, loop.get(), &QEventLoop::quit);
+    QObject::connect(timer.get(), &QTimer::timeout, loop.get(), &QEventLoop::quit);
+
+    timer->start(abs(remaining_time));
+    std::unique_ptr<QNetworkReply> reply(manager->post(request, mul_part));
+    loop->exec();
+
+    if(reply->error() != QNetworkReply::NoError)
+    {
+        throw std::runtime_error{"in function VkQuery::postRequest(): network error"};
+    }
+
+    auto result = QJsonDocument::fromJson(reply->readAll());
+    checkForErrors(result, "VkQuery::getRequest()");
+    return result;
+}
+
+QJsonDocument VkQuery::groupsGet(const QString& access_token, const QString& user_id)
 {
 #ifdef DEBUG
     qDebug() << "\n==================Getting IDs of Groups of User with ID: " << user_id << " =====================";
@@ -51,43 +95,34 @@ QJsonDocument VkQuery::groupsGet(const QString& access_token, const QString& use
 #ifdef DEBUG
     qDebug() << "Final request: " << request.toString();
 #endif
-    return getRequest(QNetworkRequest(request), wait_time);
+    return getRequest(QNetworkRequest(request));
 }
 
-QJsonDocument VkQuery::messagesSendToUser(const QString& access_token, const QString& user_id, const QString& message, int wait_time)
+QJsonDocument VkQuery::getUserName(const QString& user_id, const QString& access_token)
 {
-#ifdef DEBUG
-    qDebug() << "\n=============Sending message to User with ID: " << user_id << " =====================";
-#endif
-    QUrl request("https://api.vk.com/method/messages.send");
+    QUrl request("https://api.vk.com/method/users.get");
 
     QUrlQuery query(request);
     query.addQueryItem("user_id", user_id);
-    query.addQueryItem("peer_id", user_id);
-    query.addQueryItem("message", message);
     query.addQueryItem("access_token", access_token);
-    query.addQueryItem("test_mode", "1");
     query.addQueryItem("v", "5.52");
-#ifdef DEBUG
-    qDebug() << "Query:" << query.toString();
-#endif
+
     request.setQuery(query);
+
 #ifdef DEBUG
     qDebug() << "Final request: " << request.toString();
 #endif
 
-    return getRequest(QNetworkRequest(request), wait_time);
+    return getRequest(QNetworkRequest(request));
 }
 
-QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QString& group_id, const QString& message, int wait_time)
+QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QString& group_id, const QString& message)
 {
 #ifdef DEBUG
-    qDebug() << "\n=============Sending message to Group with ID: " << group_id << " =====================";
+    qDebug() << "\n=============Sending post to Group with ID: " << group_id << " =====================";
 #endif
 
-    //QUrl request("https://api.vk.com/method/wall.post");
-
-    QUrl request("localhost//test");
+    QUrl request("https://api.vk.com/method/wall.post");
 
     QUrlQuery query(request);
     query.addQueryItem("owner_id", QString("-").append(group_id));
@@ -103,31 +138,38 @@ QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QStrin
 
     request.setQuery(query);
 
-    return getRequest(QNetworkRequest(request), wait_time);
+    return getRequest(QNetworkRequest(request));
 }
 
-QJsonDocument VkQuery::getUserName(const QString& user_id, const QString& access_token, int wait_time)
+QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QString& group_id, const QString& message, const QString& attachments)
 {
-    QUrl request("https://api.vk.com/method/users.get");
+#ifdef DEBUG
+    qDebug() << "\n=============Sending post to Group with ID: " << group_id << " =====================";
+#endif
+
+    QUrl request("https://api.vk.com/method/wall.post");
 
     QUrlQuery query(request);
-    query.addQueryItem("user_id", user_id);
+    query.addQueryItem("owner_id", QString("-").append(group_id));
+    query.addQueryItem("friends_only", "1");
+    query.addQueryItem("message", message);
+    query.addQueryItem("attachments", attachments);
     query.addQueryItem("access_token", access_token);
+    query.addQueryItem("test_mode", "1");
     query.addQueryItem("v", "5.52");
+
+#ifdef DEBUG
+    qDebug() << "Query: " << "https://api.vk.com/method/wall.post?" << query.toString();
+#endif
 
     request.setQuery(query);
 
-#ifdef DEBUG
-    qDebug() << "Final request: " << request.toString();
-#endif
-
-    return getRequest(QNetworkRequest(request), wait_time);
+    return getRequest(QNetworkRequest(request));
 }
 
-
-QJsonDocument VkQuery::photosGetWallUploadServer(const QString& access_token, const QString& group_id, int wait_time)
+QJsonDocument VkQuery::photosGetWallUploadServer(const QString& access_token, const QString& group_id)
 {
-    QUrl request("https://api.vk.com/method/photos.saveWallPhoto");
+    QUrl request("https://api.vk.com/method/photos.getWallUploadServer");
 
     QUrlQuery query(request);
     query.addQueryItem("access_token", access_token);
@@ -140,12 +182,12 @@ QJsonDocument VkQuery::photosGetWallUploadServer(const QString& access_token, co
     qDebug() << "Final request: " << request.toString();
 #endif
 
-    return getRequest(QNetworkRequest(request), wait_time);
+    return getRequest(QNetworkRequest(request));
 }
 
-QJsonDocument VkQuery::photosSaveWallPhoto(const QString& access_token, const QString& group_id, const QString& photo, const QString& server, const QString& hash, int wait_time)
+QJsonDocument VkQuery::photosSaveWallPhoto(const QString& access_token, const QString& group_id, const QString& server, const QString& photo, const QString& hash)
 {
-    QUrl request("https://api.vk.com/method/photos.getWallUploadServer");
+    QUrl request("https://api.vk.com/method/photos.saveWallPhoto");
 
     QUrlQuery query(request);
 
@@ -162,41 +204,32 @@ QJsonDocument VkQuery::photosSaveWallPhoto(const QString& access_token, const QS
     qDebug() << "Final request: " << request.toString();
 #endif
 
-    return getRequest(QNetworkRequest(request), wait_time);
+    return getRequest(QNetworkRequest(request));
 }
 
-QJsonDocument VkQuery::makeGetRequest(const QUrl& url, const QMap<QString, QString>& params, int wait_time)
+void VkQuery::checkForErrors(const QJsonDocument& doc, const QString& name_func)
 {
-    QString request = url.toString();
-    request.append("?");
+    QString error_str("in function ");
+    error_str.append(name_func);
+    error_str.append(": ");
 
-    for(auto it = params.constBegin(); it != params.constEnd(); ++it)
+    if(doc.isEmpty())
     {
-        request.append(it.key() + "=" + it.value());
-        if(std::next(it, 1) != params.constEnd())
-        {
-            request.append("&");
-        }
+        error_str.append("no response from server");
+        throw std::runtime_error(error_str.toStdString());
     }
 
-#ifdef DEBUG
-    qDebug() << "Final request: " << request;
-#endif
+    QJsonObject error = doc["error"].toObject();
+    if(error.isEmpty())
+    {
+        return;
+    }
 
-    return getRequest(QNetworkRequest(request), wait_time);
-}
+    error_str.append("\n\terror_code from VK.Api: ");
+    error_str.append(QString::number(error["error_code"].toInt()));
+    error_str.append("\n\terror_msg from VK.Api: ");
+    error_str.append(error["error_msg"].toString());
+    error_str.append("\n");
 
-QJsonDocument VkQuery::postRequest(const QNetworkRequest& request, QHttpMultiPart* mul_part, int remaining_time)
-{
-    QNetworkAccessManager manager;
-    QEventLoop loop;
-    QTimer timer;
-
-    QObject::connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-
-    timer.start(abs(remaining_time));
-    QNetworkReply* reply = manager.post(request, mul_part);
-    loop.exec();
-    return QJsonDocument::fromJson(reply->readAll());
+    throw std::runtime_error(error_str.toStdString());
 }

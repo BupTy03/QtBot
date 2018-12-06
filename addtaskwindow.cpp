@@ -10,24 +10,17 @@
 #include <QJsonArray>
 #include <QSize>
 #include <QResizeEvent>
-
 #include <QDebug>
 
-#include <utility>
 #include <algorithm>
+#include <exception>
 
+#include "myutils.h"
 #include "queries_to_vk.h"
-
-template<typename T, typename... Ts>
-QSharedPointer<T> makeQSharedPointer(Ts&&... params)
-{
-    return QSharedPointer<T>(new T(std::forward<Ts>(params)...));
-}
 
 AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id, QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::AddTaskWindow),
-    userGroups_(getGroupsFromJson(VkQuery::groupsGet(access_token, user_id)))
+    ui(new Ui::AddTaskWindow)
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Добавление задачи"));
@@ -41,7 +34,17 @@ AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id
 
     ui->loadImageLabel->hide();
 
-    if(userGroups_->empty())
+    try
+    {
+        userGroups_ = getGroupsFromJson(VkQuery::groupsGet(access_token, user_id));
+    }
+    catch (const std::exception& e)
+    {
+        userGroups_.clear();
+        Log::toFile(e.what());
+    }
+
+    if(!userGroups_ || userGroups_->empty())
     {
         ui->radioBtnList->setVisible(false);
         ui->radioBtnFile->toggle();

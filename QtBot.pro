@@ -40,7 +40,8 @@ HEADERS += \
     task.h \
     taskwidget.h \
     vkauth.h \
-    queries_to_vk.h
+    queries_to_vk.h \
+    myutils.h
 
 FORMS += \
         mainwindow.ui \
