@@ -18,19 +18,6 @@ namespace Ui {
 class MainWindow;
 }
 
-struct User
-{
-    User(){}
-
-    User(QString id, QString name, QString access_token)
-        : id(std::move(id)), name(std::move(name)), access_token(std::move(access_token)){}
-
-    QString id;
-    QString name;
-    QString access_token;
-};
-
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

@@ -152,7 +152,8 @@ void AddTaskWindow::on_radioBtnFile_toggled(bool checked)
 
     if(currentList_->empty())
     {
-        QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось прочитать файл!"));
+        QMessageBox::critical(this, tr("Ошибка"),
+                              tr("Не удалось прочитать файл!"));
         ui->radioBtnList->toggle();
         return;
     }

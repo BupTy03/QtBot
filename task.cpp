@@ -16,7 +16,6 @@ Task::Task(const QString& access_token,
            int period,
            QObject* parent)
     : QObject(parent),
-      active_{true},
       interval_{interval},
       period_{period},
       accessToken_(access_token),
@@ -104,29 +103,7 @@ void Task::postToWall(const QString& group_id) const
     }
 
     auto upload_response = uploadPhoto(group_id);
-    QJsonDocument save_answer =
-            VkQuery::photosSaveWallPhoto(accessToken_, group_id,
-                                                    std::get<0>(upload_response), // server
-                                                    std::get<1>(upload_response), // photo
-                                                    std::get<2>(upload_response)  // hash
-                                                    );
-
-    QJsonArray response_arr = save_answer["response"].toArray();
-    if(response_arr.isEmpty())
-    {
-        return;
-    }
-
-    QJsonObject image = (response_arr.first()).toObject();
-    if(image.isEmpty())
-    {
-        return;
-    }
-
-    QString photo("photo");
-    photo.append(QString::number(image["owner_id"].toInt()));
-    photo.append("_");
-    photo.append(QString::number(image["id"].toInt()));
+    QString photo = savePhoto(group_id, upload_response);
 
     VkQuery::wallPostToGroup(accessToken_, group_id, message_, photo);
 }
@@ -151,7 +128,7 @@ std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id)
     multiPart->append(imagePart);
 
     QJsonDocument upload_result =
-            VkQuery::postRequest(QNetworkRequest(QUrl(server_url)), multiPart.get());
+            VkQuery::postRequest(QNetworkRequest(server_url), multiPart.get());
 
     QString server = QString::number(upload_result["server"].toInt());
     QString photo = upload_result["photo"].toString();
@@ -162,4 +139,33 @@ std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id)
                 std::move(photo),
                 std::move(hash)
                 );
+}
+
+QString Task::savePhoto(const QString& group_id,
+                     const std::tuple<QString, QString, QString>& photoDetails) const
+{
+    QJsonDocument save_answer =
+            VkQuery::photosSaveWallPhoto(accessToken_, group_id,
+                                                    std::get<0>(photoDetails), // server
+                                                    std::get<1>(photoDetails), // photo
+                                                    std::get<2>(photoDetails)  // hash
+                                                    );
+
+    QJsonArray response_arr = save_answer["response"].toArray();
+    if(response_arr.isEmpty())
+    {
+        throw std::runtime_error{"server hasn't sent response"};
+    }
+
+    QJsonObject image = (response_arr.first()).toObject();
+    if(image.isEmpty())
+    {
+        throw std::runtime_error{"photo hasn't been got"};
+    }
+
+    QString photo("photo");
+    photo += QString::number(image["owner_id"].toInt());
+    photo += "_";
+    photo += QString::number(image["id"].toInt());
+    return photo;
 }

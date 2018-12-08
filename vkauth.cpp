@@ -3,9 +3,12 @@
 #include <QUrlQuery>
 #include <QRegExp>
 
-VKAuth::VKAuth(QString appID, QObject* parent) : QObject(parent), appID_(std::move(appID))
+VKAuth::VKAuth(QString appID, QObject* parent)
+    : QObject(parent),
+      browser_(std::make_unique<QWebEngineView>()),
+      appID_(std::move(appID))
 {
-    QObject::connect(&browser_, &QWebEngineView::urlChanged, this, &VKAuth::checkAuth);
+    QObject::connect(browser_.get(), &QWebEngineView::urlChanged, this, &VKAuth::checkAuth);
     blockSignals(true);
 }
 
@@ -27,15 +30,15 @@ void VKAuth::auth(QString scope)
 #ifdef DEBUG
     qDebug() << "Url:" << url.toString();
 #endif
-    browser_.load(url);
+    browser_->load(url);
     blockSignals(false);
-    browser_.show();
+    browser_->show();
 }
 
 void VKAuth::reauth(QString scope)
 {
-    (((browser_.page())->profile())->cookieStore())->deleteAllCookies();
-    ((browser_.page())->profile())->clearHttpCache();
+    (((browser_->page())->profile())->cookieStore())->deleteAllCookies();
+    ((browser_->page())->profile())->clearHttpCache();
     auth(scope);
 }
 
@@ -62,7 +65,7 @@ void VKAuth::checkAuth(const QUrl& url)
     }
     else return;
 
-    browser_.close();
+    browser_->close();
     emit done(this->isValid());
 }
 

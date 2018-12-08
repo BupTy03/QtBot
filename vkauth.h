@@ -7,6 +7,8 @@
 #include <QtWebEngineWidgets>
 #include <QUrl>
 
+#include <memory>
+
 #define DEBUG
 
 class VKAuth : public QObject
@@ -30,7 +32,7 @@ private slots:
     void checkAuth(const QUrl& url);
 
 private:
-    QWebEngineView browser_;
+    std::unique_ptr<QWebEngineView> browser_;
     QString appID_;
     QString accessToken_;
     QString userID_;

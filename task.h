@@ -40,10 +40,12 @@ public slots:
 
 private:
     std::tuple<QString, QString, QString> uploadPhoto(const QString& group_id) const;
+    QString savePhoto(const QString& group_id,
+                   const std::tuple<QString, QString, QString>& photoDetails) const;
     void postToWall(const QString& group_id) const;
 
 private:
-    bool active_{};
+    bool active_{true};
     int interval_{};
     int period_{};
     QString accessToken_;
