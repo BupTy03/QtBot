@@ -6,7 +6,6 @@
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
 #include <QJsonDocument>
-#include <QMap>
 
 #define DEBUG
 
@@ -18,11 +17,22 @@ namespace VkQuery
     QJsonDocument getUserName(const QString& user_id, const QString& access_token);
     QJsonDocument groupsGet(const QString& access_token, const QString& user_id);
 
-    QJsonDocument wallPostToGroup(const QString& access_token, const QString& group_id, const QString& message);
-    QJsonDocument wallPostToGroup(const QString& access_token, const QString& group_id, const QString& message, const QString& attachments);
+    QJsonDocument wallPostToGroup(const QString& access_token,
+                                  const QString& group_id,
+                                  const QString& message);
+
+    QJsonDocument wallPostToGroup(const QString& access_token,
+                                  const QString& group_id,
+                                  const QString& message,
+                                  const QString& attachments);
 
     QJsonDocument photosGetWallUploadServer(const QString& access_token, const QString& group_id);
-    QJsonDocument photosSaveWallPhoto(const QString& access_token, const QString& group_id, const QString& server, const QString& photo, const QString& hash);
+
+    QJsonDocument photosSaveWallPhoto(const QString& access_token,
+                                      const QString& group_id,
+                                      const QString& server,
+                                      const QString& photo,
+                                      const QString& hash);
 
     void checkForErrors(const QJsonDocument& doc, const QString& name_func);
 }

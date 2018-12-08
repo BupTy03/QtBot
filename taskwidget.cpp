@@ -2,7 +2,7 @@
 
 #include <QStandardItem>
 
-TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* parent) : QWidget(parent)
+TaskWidget::TaskWidget(Task* task, QWidget* parent) : QWidget(parent)
 {
     this->setMinimumHeight(210);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
@@ -20,9 +20,9 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
 
     grChModel_ = new QStandardItemModel(this);
 
-    for(const auto& group : groups_list)
+    for(const auto& group : task->getGroups())
     {
-        QStandardItem* tmp = new QStandardItem(group);
+        QStandardItem* tmp = new QStandardItem(group.second);
         tmp->setEditable(false);
         grChModel_->appendRow(tmp);
     }

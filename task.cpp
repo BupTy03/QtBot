@@ -5,12 +5,12 @@
 #include <QFile>
 #include <QTextStream>
 
-#include <exception>
+#include <stdexcept>
 
 #include "myutils.h"
 
 Task::Task(const QString& access_token,
-           const QStringList& groups,
+           const std::vector<std::pair<QString, QString>>& groups,
            const QString& message,
            int interval,
            int period,
@@ -20,72 +20,35 @@ Task::Task(const QString& access_token,
       period_{period},
       accessToken_(access_token),
       message_(message),
-      groupsIds_(groups)
+      groups_(groups)
 {}
 
-void Task::timerEvent(QTimerEvent* /*event*/)
+void Task::timerEvent(QTimerEvent* event)
 {
     if(!active_)
     {
         return;
     }
 
-    for(const auto& groupId : groupsIds_)
+    for(const auto& group : groups_)
     {
-        try
-        {
-            postToWall(groupId);
-        }
-        catch (const std::exception& e)
-        {
-            Log::toFile(e.what());
-        }
+        postToWall(group.first);
         (this->thread())->msleep(static_cast<unsigned long>(interval_*1000));
     }
 }
 
-const QStringList& Task::groupsIds() const
-{
-    return groupsIds_;
-}
-
-const QString& Task::getMessage() const
-{
-    return message_;
-}
-
-int Task::getInterval() const
-{
-    return interval_;
-}
-
-int Task::getPeriod() const
-{
-    return period_;
-}
-
 bool Task::attachPhoto(const QString& img_path)
 {
-    auto file = std::make_unique<QFile>(img_path);
-    if(!file->open(QIODevice::ReadOnly))
+    QFile file(img_path);
+    if(!file.open(QIODevice::ReadOnly))
     {
         return false;
     }
 
-    photoAttachment_ = std::make_unique<QByteArray>(file->readAll());
-    file->close();
+    photoAttachment_ = std::make_unique<QByteArray>(file.readAll());
+    file.close();
 
     return true;
-}
-
-void Task::start()
-{
-    active_ = true;
-}
-
-void Task::stop()
-{
-    active_ = false;
 }
 
 void Task::go()
@@ -96,16 +59,23 @@ void Task::go()
 
 void Task::postToWall(const QString& group_id) const
 {
-    if(!photoAttachment_)
+    try
     {
-        VkQuery::wallPostToGroup(accessToken_, group_id, message_);
-        return;
+        if(!photoAttachment_)
+        {
+            VkQuery::wallPostToGroup(accessToken_, group_id, message_);
+            return;
+        }
+
+        auto upload_response = uploadPhoto(group_id);
+        QString photo = savePhoto(group_id, upload_response);
+
+        VkQuery::wallPostToGroup(accessToken_, group_id, message_, photo);
     }
-
-    auto upload_response = uploadPhoto(group_id);
-    QString photo = savePhoto(group_id, upload_response);
-
-    VkQuery::wallPostToGroup(accessToken_, group_id, message_, photo);
+    catch (const std::exception& e)
+    {
+        Log::toFile(e.what());
+    }
 }
 
 std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id) const
@@ -137,8 +107,7 @@ std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id)
     return std::make_tuple(
                 std::move(server),
                 std::move(photo),
-                std::move(hash)
-                );
+                std::move(hash));
 }
 
 QString Task::savePhoto(const QString& group_id,

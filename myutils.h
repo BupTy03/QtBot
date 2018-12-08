@@ -2,15 +2,8 @@
 #ifndef MYUTILS_H
 #define MYUTILS_H
 
-#include <QSharedPointer>
-#include <QTextStream>
 #include <QFile>
-
-template<typename T, typename... Ts>
-QSharedPointer<T> makeQSharedPointer(Ts&&... params)
-{
-    return QSharedPointer<T>(new T(std::forward<Ts>(params)...));
-}
+#include <QTextStream>
 
 class Log
 {

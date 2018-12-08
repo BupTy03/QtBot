@@ -7,7 +7,6 @@
 #include <QMessageBox>
 #include <QStandardItem>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QSize>
 #include <QResizeEvent>
 #include <QDebug>
@@ -34,18 +33,12 @@ AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id
 
     ui->loadImageLabel->hide();
 
-    try
-    {
-        userGroups_ = getGroupsFromJson(VkQuery::groupsGet(access_token, user_id));
-    }
-    catch (const std::exception& e)
-    {
-        userGroups_.clear();
-        Log::toFile(e.what());
-    }
+    userGroups_ = getGroupsFromJson(VkQuery::groupsGet(access_token, user_id));
 
     if(!userGroups_ || userGroups_->empty())
     {
+        QMessageBox::warning(this, tr("Предепреждение"),
+                             tr("Не удалось загузить список сообществ пользователя"));
         ui->radioBtnList->setVisible(false);
         ui->radioBtnFile->toggle();
         return;
@@ -68,48 +61,6 @@ int AddTaskWindow::getPeriod() const
     return ui->periodSpinBox->value();
 }
 
-QVector<int> AddTaskWindow::getGroupsIndexes() const
-{   
-    QVector<int> indexes;
-    const auto rcount = groupsModel_->rowCount();
-    for(int i = 0; i < rcount; ++i)
-    {
-        if((groupsModel_->item(i, 0))->checkState() == Qt::Checked)
-        {
-            indexes.push_back(i);
-        }
-    }
-    return indexes;
-}
-
-QStringList AddTaskWindow::getGroupsNames() const
-{
-    QVector<int> indexes = getGroupsIndexes();
-    QStringList result;
-    result.reserve(indexes.size());
-
-    std::transform(indexes.cbegin(), indexes.cend(), std::back_inserter(result),
-    [this](auto indx){
-        return (currentList_->at(indx)).name;
-    });
-
-    return result;
-}
-
-QStringList AddTaskWindow::getGroupsIds() const
-{
-    QVector<int> indexes = getGroupsIndexes();
-    QStringList result;
-    result.reserve(indexes.size());
-
-    std::transform(indexes.cbegin(), indexes.cend(), std::back_inserter(result),
-    [this](auto indx){
-        return (currentList_->at(indx)).id;
-    });
-
-    return result;
-}
-
 QString AddTaskWindow::getMessage() const
 {
     return ui->textMessage->toPlainText();
@@ -123,6 +74,28 @@ bool AddTaskWindow::hasImage() const
 QString AddTaskWindow::getImgPath() const
 {
     return imgPath_;
+}
+
+std::vector<std::pair<QString, QString>> AddTaskWindow::getGroups() const
+{
+    std::vector<std::pair<QString, QString>> result;
+    if(!currentList_)
+    {
+        return result;
+    }
+
+    const auto rcount = groupsModel_->rowCount();
+    for(int i = 0; i < rcount; ++i)
+    {
+        if((groupsModel_->item(i, 0))->checkState() == Qt::Checked)
+        {
+            const auto& group = (*currentList_).at(i);
+            result.emplace_back(QString::number(group["id"].toInt()),
+                                group["name"].toString());
+        }
+    }
+
+    return result;
 }
 
 void AddTaskWindow::on_radioBtnList_toggled(bool checked)
@@ -146,14 +119,24 @@ void AddTaskWindow::on_radioBtnFile_toggled(bool checked)
     this->setDisabled(true);
 
     currentList_ = readGroupsFromFile(QFileDialog::getOpenFileName(this,
-                                     tr("Открыть файл JSON"), QDir::currentPath(), tr("Json files (*.json)")));
+                                      tr("Открыть файл JSON"),
+                                      QDir::currentPath(),
+                                      tr("Json files (*.json)")));
 
     this->setEnabled(true);
 
-    if(currentList_->empty())
+    if(!currentList_)
     {
-        QMessageBox::critical(this, tr("Ошибка"),
+        QMessageBox::critical(this,
+                              tr("Ошибка"),
                               tr("Не удалось прочитать файл!"));
+
+        if(!userGroups_)
+        {
+            ui->buttonBox
+                    ->button(QDialogButtonBox::Cancel)->click();
+        }
+
         ui->radioBtnList->toggle();
         return;
     }
@@ -163,10 +146,15 @@ void AddTaskWindow::on_radioBtnFile_toggled(bool checked)
 
 void AddTaskWindow::updateItems()
 {
-    this->groupsModel_->clear();
-    std::for_each(std::cbegin(*currentList_), std::cend(*currentList_), [this](const auto& gr)
+    if(!currentList_)
     {
-        QStandardItem* tmp = new QStandardItem(gr.name);
+        return;
+    }
+
+    this->groupsModel_->clear();
+    std::for_each(std::cbegin(*currentList_), std::cend(*currentList_), [this](const auto& group)
+    {
+        QStandardItem* tmp = new QStandardItem(group["name"].toString());
         tmp->setCheckable(true);
         tmp->setEditable(false);
         this->groupsModel_->appendRow(tmp);
@@ -186,51 +174,29 @@ bool AddTaskWindow::areAllItemsUnchecked()
     return true;
 }
 
-QSharedPointer<QVector<Group>> AddTaskWindow::getGroupsFromJson(const QJsonDocument& document) const
+std::shared_ptr<QJsonArray> AddTaskWindow::getGroupsFromJson(const QJsonDocument& document) const
 {
-    QJsonObject response = (document.object())["response"].toObject();
+    QJsonArray array = ((document["response"])["items"]).toArray();
 
-    auto groups = makeQSharedPointer<QVector<Group>>();
-    groups->reserve(response["count"].toInt());
-
-    QJsonArray items = response["items"].toArray();
-
-    qDebug() << "==================Groups loaded==================";
-
-    std::transform(std::cbegin(items), std::cend(items),
-                   std::back_inserter(*groups),
-    [](auto json_val)
+    if(array.empty())
     {
-        qDebug() << "GroupID: " << QString::number(json_val["id"].toInt());
-        qDebug() << "GroupName: " << json_val["name"].toString();
-        qDebug();
-        return Group(QString::number(json_val["id"].toInt()), json_val["name"].toString());
-    });
+        return nullptr;
+    }
 
-    qDebug() << "=================================================";
-
-    return groups;
+    return std::make_shared<QJsonArray>(std::move(array));
 }
 
-QSharedPointer<QVector<Group>> AddTaskWindow::readGroupsFromFile(const QString& filename)
+std::shared_ptr<QJsonArray> AddTaskWindow::readGroupsFromFile(const QString& filename)
 {
-    auto groups = makeQSharedPointer<QVector<Group>>();
     QFile file(filename);
     if(!file.open(QIODevice::ReadOnly))
     {
-        return groups;
+        return nullptr;
     }
 
-    QJsonArray groupsJArray = (QJsonDocument::fromJson(file.readAll())).array();
-    groups->reserve(groupsJArray.size());
-
-    std::transform(groupsJArray.constBegin(), groupsJArray.constEnd(),
-                   std::back_inserter(*groups),
-    [](auto group)
-    {
-        return Group(QString::number(group["id"].toInt()), group["name"].toString());
-    });
-
+    auto groups = std::make_shared<QJsonArray>(
+                (QJsonDocument::fromJson(file.readAll())).array());
+    file.close();
     return groups;
 }
 
@@ -269,5 +235,7 @@ void AddTaskWindow::on_loadImageBtn_clicked()
 void AddTaskWindow::updateLoadImg()
 {
     QSize sz = ui->loadImageLabel->size();
-    ui->loadImageLabel->setPixmap(loadImg_.scaled(sz.width(), sz.height(), Qt::KeepAspectRatio));
+    ui->loadImageLabel->setPixmap(
+                loadImg_.scaled(sz.width(), sz.height(),
+                                Qt::KeepAspectRatio));
 }

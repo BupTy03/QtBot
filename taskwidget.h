@@ -8,11 +8,13 @@
 #include <QStringList>
 #include <QStandardItemModel>
 
+#include <vector>
+
 class TaskWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit TaskWidget(Task* task, const QStringList& groups_list, QWidget *parent = nullptr);
+    explicit TaskWidget(Task* task, QWidget *parent = nullptr);
 
 signals:
     void signalStart();
@@ -25,14 +27,14 @@ private slots:
     void onRemoveBtnClick();
 
 private:
-    QStandardItemModel* grChModel_;
-    QListView* groupsView_;
-    QTextEdit* messageEdit_;
-    QSpinBox* intervalSB_;
-    QSpinBox* periodSB_;
-    QPushButton* startBtn_;
-    QPushButton* stopBtn_;
-    QPushButton* removeBtn_;
+    QStandardItemModel* grChModel_{};
+    QListView* groupsView_{};
+    QTextEdit* messageEdit_{};
+    QSpinBox* intervalSB_{};
+    QSpinBox* periodSB_{};
+    QPushButton* startBtn_{};
+    QPushButton* stopBtn_{};
+    QPushButton* removeBtn_{};
 };
 
 #endif // TASKWIDGET_H

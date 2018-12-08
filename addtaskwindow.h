@@ -4,26 +4,17 @@
 
 #include <QDialog>
 #include <QString>
-#include <QVector>
-#include <QStringList>
-#include <QSharedPointer>
 #include <QStandardItemModel>
 #include <QJsonDocument>
+#include <QJsonArray>
+
+#include <memory>
+#include <vector>
+#include <utility>
 
 namespace Ui {
 class AddTaskWindow;
 }
-
-struct Group
-{
-    Group(){}
-
-    Group(QString id, QString name)
-        : id(std::move(id)), name(std::move(name)){}
-
-    QString id;
-    QString name;
-};
 
 class AddTaskWindow : public QDialog
 {
@@ -35,12 +26,10 @@ public:
 
     int getInterval() const;
     int getPeriod() const;
-    QVector<int> getGroupsIndexes() const;
-    QStringList getGroupsIds() const;
-    QStringList getGroupsNames() const;
     QString getMessage() const;
     bool hasImage() const;
     QString getImgPath() const;
+    std::vector<std::pair<QString, QString>> getGroups() const;
 
 private slots:
     void on_radioBtnList_toggled(bool checked);
@@ -53,17 +42,17 @@ private slots:
 private:
     void updateItems();
     bool areAllItemsUnchecked();
-    QSharedPointer<QVector<Group>> getGroupsFromJson(const QJsonDocument& document) const;
-    QSharedPointer<QVector<Group>> readGroupsFromFile(const QString& filename);
+    std::shared_ptr<QJsonArray> getGroupsFromJson(const QJsonDocument& document) const;
+    std::shared_ptr<QJsonArray> readGroupsFromFile(const QString& filename);
 
 public slots:
     virtual int exec() override;
 
 private:
-    Ui::AddTaskWindow *ui;
-    QStandardItemModel* groupsModel_;
-    QSharedPointer<QVector<Group>> userGroups_;
-    QSharedPointer<QVector<Group>> currentList_;
+    Ui::AddTaskWindow* ui{};
+    QStandardItemModel* groupsModel_{};
+    std::shared_ptr<QJsonArray> userGroups_;
+    std::shared_ptr<QJsonArray> currentList_;
     QString imgPath_;
     QPixmap loadImg_;
 

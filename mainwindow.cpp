@@ -83,19 +83,24 @@ void MainWindow::on_NewTaskAction_triggered()
         return;
     }
 
-    Task* curr_task = new Task(((users_.at(currentUser))["access_token"]).toString(),
-                               addTskWin.getGroupsIds(),
+    auto access_token = ((users_.at(currentUser))["access_token"]).toString();
+    Task* curr_task = new Task(access_token,
+                               addTskWin.getGroups(),
                                addTskWin.getMessage(),
                                addTskWin.getInterval(),
                                addTskWin.getPeriod());
 
     if(addTskWin.hasImage())
     {
-        curr_task->attachPhoto(addTskWin.getImgPath());
+        if(!curr_task->attachPhoto(addTskWin.getImgPath()))
+        {
+            QMessageBox::warning(this, tr("Ошибка"),
+                                 tr("Не удалось открыть изображение!"));
+        }
     }
 
     (((ui->scrollArea)->widget())->layout())
-            ->addWidget(new TaskWidget(curr_task, addTskWin.getGroupsNames()));
+            ->addWidget(new TaskWidget(curr_task));
 
     curr_task->go();
     curr_task->moveToThread(secondThread_);
@@ -105,7 +110,9 @@ void MainWindow::checkLogin(bool success)
 {
     if(!success)
     {
-        QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
+        QMessageBox::critical(this,
+                              tr("Ошибка"),
+                              tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
         return;
     }
 
@@ -126,7 +133,6 @@ void MainWindow::on_ChangeUserCB_currentIndexChanged(int index)
 
 QString MainWindow::userNameFromJson(const QJsonDocument& doc) const
 {
-    qDebug() << doc;
     QJsonArray arr = doc["response"].toArray();
     if(arr.empty())
     {
@@ -148,8 +154,9 @@ void MainWindow::addNewUser(const QString& id, const QString& access_token)
 
     try
     {
-        usr["name"] = userNameFromJson(VkQuery::getUserName(vkAuth_->get_user_id(),
-                                                            vkAuth_->get_access_token()));
+        usr["name"] = userNameFromJson(
+                    VkQuery::getUserName(vkAuth_->get_user_id(),
+                                         vkAuth_->get_access_token()));
     }
     catch (const std::exception& e)
     {
@@ -176,9 +183,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
     QFile file("users.json");
     if(!file.open(QIODevice::WriteOnly))
     {
+        QMessageBox::critical(this,
+                              tr("Ошибка"),
+                              tr("Не удалось записать пользователя в файл users.json"));
         return;
     }
-    file.write((QJsonDocument(users_)).toJson());
+    file.write(QJsonDocument(users_).toJson());
     file.close();
     QApplication::quit();
 }
