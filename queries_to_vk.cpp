@@ -76,7 +76,7 @@ QJsonDocument VkQuery::postRequest(const QNetworkRequest& request, QHttpMultiPar
 QJsonDocument VkQuery::groupsGet(const QString& access_token, const QString& user_id)
 {
 #ifdef DEBUG
-    qDebug() << "\n==================Getting IDs of Groups of User with ID: " << user_id << " =====================";
+    qDebug() << "\n\n====================Getting IDs of Groups of User with ID: " << user_id << "==========";
 #endif
     QUrl request("https://api.vk.com/method/groups.get");
 
@@ -93,13 +93,18 @@ QJsonDocument VkQuery::groupsGet(const QString& access_token, const QString& use
 #endif
     request.setQuery(query);
 #ifdef DEBUG
-    qDebug() << "Final request: " << request.toString();
+    qDebug() << "\nFinal request: " << request.toString();
+    qDebug() << "\n=========================================================================================";
 #endif
     return getRequest(QNetworkRequest(request));
 }
 
 QJsonDocument VkQuery::getUserName(const QString& user_id, const QString& access_token)
 {
+#ifdef DEBUG
+    qDebug() << "\n\n====================Getting name User with ID: " << user_id << "==========";
+#endif
+
     QUrl request("https://api.vk.com/method/users.get");
 
     QUrlQuery query(request);
@@ -111,6 +116,7 @@ QJsonDocument VkQuery::getUserName(const QString& user_id, const QString& access
 
 #ifdef DEBUG
     qDebug() << "Final request: " << request.toString();
+    qDebug() << "\n=========================================================================================";
 #endif
 
     return getRequest(QNetworkRequest(request));
@@ -119,7 +125,7 @@ QJsonDocument VkQuery::getUserName(const QString& user_id, const QString& access
 QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QString& group_id, const QString& message)
 {
 #ifdef DEBUG
-    qDebug() << "\n=============Sending post to Group with ID: " << group_id << " =====================";
+    qDebug() << "\n\n====================Sending post to Group with ID: " << group_id << "==========";
 #endif
 
     QUrl request("https://api.vk.com/method/wall.post");
@@ -132,11 +138,12 @@ QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QStrin
     query.addQueryItem("test_mode", "1");
     query.addQueryItem("v", "5.52");
 
-#ifdef DEBUG
-    qDebug() << "Query: " << "https://api.vk.com/method/wall.post?" << query.toString();
-#endif
-
     request.setQuery(query);
+
+#ifdef DEBUG
+    qDebug() << "Final request: " << request.toString();
+    qDebug() << "\n=========================================================================================";
+#endif
 
     return getRequest(QNetworkRequest(request));
 }
@@ -144,7 +151,7 @@ QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QStrin
 QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QString& group_id, const QString& message, const QString& attachments)
 {
 #ifdef DEBUG
-    qDebug() << "\n=============Sending post to Group with ID: " << group_id << " =====================";
+    qDebug() << "\n\n====================Sending post to Group with ID: " << group_id << "==========";
 #endif
 
     QUrl request("https://api.vk.com/method/wall.post");
@@ -158,17 +165,22 @@ QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QStrin
     query.addQueryItem("test_mode", "1");
     query.addQueryItem("v", "5.52");
 
-#ifdef DEBUG
-    qDebug() << "Query: " << "https://api.vk.com/method/wall.post?" << query.toString();
-#endif
-
     request.setQuery(query);
+
+#ifdef DEBUG
+    qDebug() << "Final request: " << request.toString();
+    qDebug() << "\n=========================================================================================";
+#endif
 
     return getRequest(QNetworkRequest(request));
 }
 
 QJsonDocument VkQuery::photosGetWallUploadServer(const QString& access_token, const QString& group_id)
 {
+#ifdef DEBUG
+    qDebug() << "\n\n====================Getting wall upload server for Group with ID: " << group_id << "==========";
+#endif
+
     QUrl request("https://api.vk.com/method/photos.getWallUploadServer");
 
     QUrlQuery query(request);
@@ -180,6 +192,7 @@ QJsonDocument VkQuery::photosGetWallUploadServer(const QString& access_token, co
 
 #ifdef DEBUG
     qDebug() << "Final request: " << request.toString();
+    qDebug() << "\n=========================================================================================";
 #endif
 
     return getRequest(QNetworkRequest(request));
@@ -187,6 +200,10 @@ QJsonDocument VkQuery::photosGetWallUploadServer(const QString& access_token, co
 
 QJsonDocument VkQuery::photosSaveWallPhoto(const QString& access_token, const QString& group_id, const QString& server, const QString& photo, const QString& hash)
 {
+#ifdef DEBUG
+    qDebug() << "\n\n====================Saving wall photo for Group with ID: " << group_id << "==========";
+#endif
+
     QUrl request("https://api.vk.com/method/photos.saveWallPhoto");
 
     QUrlQuery query(request);
@@ -202,6 +219,7 @@ QJsonDocument VkQuery::photosSaveWallPhoto(const QString& access_token, const QS
 
 #ifdef DEBUG
     qDebug() << "Final request: " << request.toString();
+    qDebug() << "\n=========================================================================================";
 #endif
 
     return getRequest(QNetworkRequest(request));

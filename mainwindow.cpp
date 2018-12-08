@@ -12,7 +12,6 @@
 #include <exception>
 
 #include "queries_to_vk.h"
-#include "myutils.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -79,7 +78,8 @@ void MainWindow::on_NewTaskAction_triggered()
 
     if(!addTskWin.exec())
     {
-        QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка добавления группы!"));
+        qCritical() << "Failed to add a new task!";
+        QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка добавления задачи!"));
         return;
     }
 
@@ -94,8 +94,9 @@ void MainWindow::on_NewTaskAction_triggered()
     {
         if(!curr_task->attachPhoto(addTskWin.getImgPath()))
         {
+            qWarning() << "Failed to attach image!";
             QMessageBox::warning(this, tr("Ошибка"),
-                                 tr("Не удалось открыть изображение!"));
+                                 tr("Не удалось добавить изображение!"));
         }
     }
 
@@ -110,6 +111,7 @@ void MainWindow::checkLogin(bool success)
 {
     if(!success)
     {
+        qCritical() << "Failed to log in!";
         QMessageBox::critical(this,
                               tr("Ошибка"),
                               tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
@@ -161,7 +163,7 @@ void MainWindow::addNewUser(const QString& id, const QString& access_token)
     catch (const std::exception& e)
     {
         usr["name"] = id;
-        Log::toFile(e.what());
+        qWarning() << "Failed to load name of user error: " << e.what();
     }
 
     users_.append(usr);
@@ -183,8 +185,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
     QFile file("users.json");
     if(!file.open(QIODevice::WriteOnly))
     {
-        QMessageBox::critical(this,
-                              tr("Ошибка"),
+        qWarning() << "Failed to save users.json file!";
+        QMessageBox::warning(this,
+                              tr("Предупреждение"),
                               tr("Не удалось записать пользователя в файл users.json"));
         return;
     }

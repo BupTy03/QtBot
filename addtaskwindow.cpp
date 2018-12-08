@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <exception>
 
-#include "myutils.h"
 #include "queries_to_vk.h"
 
 AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id, QWidget* parent) :
@@ -33,11 +32,18 @@ AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id
 
     ui->loadImageLabel->hide();
 
-    userGroups_ = getGroupsFromJson(VkQuery::groupsGet(access_token, user_id));
+    try
+    {
+        userGroups_ = getGroupsFromJson(VkQuery::groupsGet(access_token, user_id));
+    }
+    catch(const std::exception& e)
+    {
+        qWarning() << "Failed to load the list of groups of user error: " << e.what();
+    }
 
     if(!userGroups_ || userGroups_->empty())
     {
-        QMessageBox::warning(this, tr("Предепреждение"),
+        QMessageBox::warning(this, tr("Предупреждение"),
                              tr("Не удалось загузить список сообществ пользователя"));
         ui->radioBtnList->setVisible(false);
         ui->radioBtnFile->toggle();
@@ -127,6 +133,7 @@ void AddTaskWindow::on_radioBtnFile_toggled(bool checked)
 
     if(!currentList_)
     {
+        qCritical() << "Could not read file with the groups list!";
         QMessageBox::critical(this,
                               tr("Ошибка"),
                               tr("Не удалось прочитать файл!"));
@@ -180,7 +187,7 @@ std::shared_ptr<QJsonArray> AddTaskWindow::getGroupsFromJson(const QJsonDocument
 
     if(array.empty())
     {
-        return nullptr;
+        throw std::runtime_error{"groups list is empty!"};
     }
 
     return std::make_shared<QJsonArray>(std::move(array));
@@ -222,7 +229,8 @@ void AddTaskWindow::on_loadImageBtn_clicked()
                                                     tr("Images (*.jpg)"));
     if(!loadImg_.load(filename))
     {
-        QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка чтения файла!"));
+        qWarning() << "Failed to open the image!";
+        QMessageBox::warning(this, tr("Ошибка"), tr("Ошибка чтения файла!"));
         return;
     }
 

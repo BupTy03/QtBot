@@ -7,8 +7,6 @@
 
 #include <stdexcept>
 
-#include "myutils.h"
-
 Task::Task(const QString& access_token,
            const std::vector<std::pair<QString, QString>>& groups,
            const QString& message,
@@ -74,7 +72,7 @@ void Task::postToWall(const QString& group_id) const
     }
     catch (const std::exception& e)
     {
-        Log::toFile(e.what());
+        qCritical() << "Error: " << e.what();
     }
 }
 
