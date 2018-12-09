@@ -22,7 +22,7 @@ AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id
 {
     ui->setupUi(this);
     this->setWindowTitle(tr("Добавление задачи"));
-    this->setWindowFlags (this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     ui->intervalSpinBox->setRange(1, 10000);
     ui->periodSpinBox->setRange(1, 18000);
@@ -125,23 +125,22 @@ void AddTaskWindow::on_radioBtnFile_toggled(bool checked)
     this->setDisabled(true);
 
     currentList_ = readGroupsFromFile(QFileDialog::getOpenFileName(this,
-                                      tr("Открыть файл JSON"),
+                                      tr("Загрузить сообщества из файла JSON"),
                                       QDir::currentPath(),
                                       tr("Json files (*.json)")));
 
     this->setEnabled(true);
 
-    if(!currentList_)
+    if(!currentList_ || currentList_->isEmpty())
     {
         qCritical() << "Could not read file with the groups list!";
         QMessageBox::critical(this,
                               tr("Ошибка"),
                               tr("Не удалось прочитать файл!"));
 
-        if(!userGroups_)
+        if(!userGroups_ || userGroups_->isEmpty())
         {
-            ui->buttonBox
-                    ->button(QDialogButtonBox::Cancel)->click();
+            this->reject();
         }
 
         ui->radioBtnList->toggle();

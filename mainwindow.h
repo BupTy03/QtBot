@@ -27,20 +27,16 @@ public:
 
 private slots:
     void on_ExitAction_triggered();
-
     void on_NewTaskAction_triggered();
-
     void checkLogin(bool success);
-
     void on_AddUser_triggered();
-
     void on_ChangeUserCB_currentIndexChanged(int index);
+    void on_ChangeTokenAction_triggered();
 
 private:
     QString userNameFromJson(const QJsonDocument& doc) const;
     void addNewUser(const QString& id, const QString& access_token);
     void updateUsersComboBox();
-
     virtual void closeEvent(QCloseEvent* event) override;
 
 private:

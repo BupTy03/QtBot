@@ -60,6 +60,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="changeTokenBtn">
+        <property name="text">
+         <string>Сменить токен</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -109,7 +116,7 @@
          <x>0</x>
          <y>0</y>
          <width>744</width>
-         <height>447</height>
+         <height>469</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -180,6 +187,7 @@
      <string>Меню</string>
     </property>
     <addaction name="AddUser"/>
+    <addaction name="ChangeTokenAction"/>
     <addaction name="NewTaskAction"/>
     <addaction name="ExitAction"/>
    </widget>
@@ -192,8 +200,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="AddUser"/>
-   <addaction name="NewTaskAction"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="NewTaskAction">
@@ -227,6 +233,15 @@
    </property>
    <property name="text">
     <string>Добавить пользователя</string>
+   </property>
+  </action>
+  <action name="ChangeTokenAction">
+   <property name="icon">
+    <iconset resource="resouces.qrc">
+     <normaloff>:/res/img/update.png</normaloff>:/res/img/update.png</iconset>
+   </property>
+   <property name="text">
+    <string>Сменить токен</string>
    </property>
   </action>
  </widget>

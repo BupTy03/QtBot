@@ -25,12 +25,10 @@ public:
                   QObject* parent = nullptr);
 
     virtual void timerEvent(QTimerEvent* event) override;
-
     const std::vector<std::pair<QString, QString>>& getGroups() const { return groups_; }
     const QString& getMessage() const { return message_; }
     int getInterval() const { return interval_; }
     int getPeriod() const { return period_; }
-
     bool attachPhoto(const QString& img_path);
 
 public slots:

@@ -12,6 +12,7 @@
 #include <exception>
 
 #include "queries_to_vk.h"
+#include "updatetokenwidget.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -36,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->NewTaskBtn->setVisible(!is_empty);
     ui->NewTaskAction->setDisabled(is_empty);
 
+    ui->changeTokenBtn->setVisible(!is_empty);
+    ui->ChangeTokenAction->setDisabled(is_empty);
+
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
@@ -47,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->AddUserPB, &QPushButton::released, ui->AddUser, &QAction::trigger);
     QObject::connect(ui->ExitBtn, &QPushButton::released, ui->ExitAction, &QAction::trigger);
     QObject::connect(ui->NewTaskBtn, &QPushButton::released, ui->NewTaskAction, &QAction::trigger);
+    QObject::connect(ui->changeTokenBtn, &QPushButton::released, ui->ChangeTokenAction, &QAction::trigger);
 
     QObject::connect(vkAuth_, &VKAuth::done, this, &MainWindow::checkLogin);
 
@@ -62,7 +67,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_ExitAction_triggered()
 {
-    close();
+    this->closeEvent(new QCloseEvent);
 }
 
 void MainWindow::on_NewTaskAction_triggered()
@@ -121,6 +126,8 @@ void MainWindow::checkLogin(bool success)
     addNewUser(vkAuth_->get_user_id(), vkAuth_->get_access_token());
     ui->NewTaskBtn->show();
     ui->NewTaskAction->setEnabled(true);
+    ui->changeTokenBtn->show();
+    ui->ChangeTokenAction->setEnabled(true);
 }
 
 void MainWindow::on_AddUser_triggered()
@@ -194,4 +201,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
     file.write(QJsonDocument(users_).toJson());
     file.close();
     QApplication::quit();
+}
+
+void MainWindow::on_ChangeTokenAction_triggered()
+{
+    if(currentUser < 0 || currentUser >= users_.size())
+    {
+        return;
+    }
+
+    UpdateTokenWidget updateTWin;
+
+    if(updateTWin.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    QJsonObject tmp_user = (users_.at(currentUser)).toObject();
+    tmp_user["access_token"] = updateTWin.getToken();
+    users_[currentUser] = tmp_user;
+    QMessageBox::information(this,
+                             tr("Успех"),
+                             tr("Вы успешно сменили токен!"));
 }

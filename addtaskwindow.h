@@ -33,12 +33,10 @@ public:
 
 private slots:
     void on_radioBtnList_toggled(bool checked);
-
     void on_radioBtnFile_toggled(bool checked);
-
     void on_loadImageBtn_clicked();
-
     void updateLoadImg();
+
 private:
     void updateItems();
     bool areAllItemsUnchecked();

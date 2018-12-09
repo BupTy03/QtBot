@@ -5,7 +5,6 @@
 #include "task.h"
 
 #include <QtWidgets>
-#include <QStringList>
 #include <QStandardItemModel>
 
 #include <vector>
