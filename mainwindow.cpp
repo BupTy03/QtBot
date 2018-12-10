@@ -61,7 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    secondThread_->terminate();
+    secondThread_->quit();
+    secondThread_->wait();
     delete ui;
 }
 
@@ -84,7 +85,9 @@ void MainWindow::on_NewTaskAction_triggered()
     if(!addTskWin.exec())
     {
         qCritical() << "Failed to add a new task!";
-        QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка добавления задачи!"));
+        QMessageBox::critical(this,
+                              tr("Ошибка"),
+                              tr("Ошибка добавления задачи!"));
         return;
     }
 
@@ -94,6 +97,9 @@ void MainWindow::on_NewTaskAction_triggered()
                                addTskWin.getMessage(),
                                addTskWin.getInterval(),
                                addTskWin.getPeriod());
+
+    QObject::connect(this, &MainWindow::startTask,
+                     curr_task, &Task::go);
 
     if(addTskWin.hasImage())
     {
@@ -108,8 +114,8 @@ void MainWindow::on_NewTaskAction_triggered()
     (((ui->scrollArea)->widget())->layout())
             ->addWidget(new TaskWidget(curr_task));
 
-    curr_task->go();
     curr_task->moveToThread(secondThread_);
+    emit startTask();
 }
 
 void MainWindow::checkLogin(bool success)

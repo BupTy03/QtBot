@@ -31,7 +31,7 @@ void Task::timerEvent(QTimerEvent* event)
     for(const auto& group : groups_)
     {
         postToWall(group.first);
-        (this->thread())->msleep(static_cast<unsigned long>(interval_*1000));
+        (this->thread())->sleep(static_cast<unsigned long>(interval_));
     }
 }
 
@@ -50,7 +50,7 @@ bool Task::attachPhoto(const QString& img_path)
 }
 
 void Task::go()
-{
+{    
     this->timerEvent(new QTimerEvent(0));
     startTimer(period_*1000);
 }

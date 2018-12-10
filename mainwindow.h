@@ -25,6 +25,9 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     virtual ~MainWindow() override;
 
+signals:
+    void startTask();
+
 private slots:
     void on_ExitAction_triggered();
     void on_NewTaskAction_triggered();
