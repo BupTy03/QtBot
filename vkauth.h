@@ -5,6 +5,9 @@
 #include <QObject>
 #include <QString>
 #include <QtWebEngineWidgets>
+#include <QUrl>
+
+#include <memory>
 
 #define DEBUG
 
@@ -15,6 +18,7 @@ public:
     explicit VKAuth(QString appID, QObject* parent = nullptr);
 
     void auth(QString scope);
+    void reauth(QString scope);
     bool isValid();
 
     QString get_app_id() const {return appID_;}
@@ -28,7 +32,7 @@ private slots:
     void checkAuth(const QUrl& url);
 
 private:
-    QWebEngineView browser_;
+    std::unique_ptr<QWebEngineView> browser_;
     QString appID_;
     QString accessToken_;
     QString userID_;

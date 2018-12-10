@@ -28,6 +28,60 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Выбор пользователя: </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="ChangeUserCB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="AddUserPB">
+        <property name="text">
+         <string>Добавить пользователя</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="changeTokenBtn">
+        <property name="text">
+         <string>Сменить токен</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QScrollArea" name="scrollArea">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -62,7 +116,7 @@
          <x>0</x>
          <y>0</y>
          <width>744</width>
-         <height>477</height>
+         <height>469</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -102,13 +156,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="LoginBtn">
-        <property name="text">
-         <string>Логин</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="NewTaskBtn">
         <property name="text">
          <string>Новая задача</string>
@@ -139,7 +186,8 @@
     <property name="title">
      <string>Меню</string>
     </property>
-    <addaction name="LoginAction"/>
+    <addaction name="AddUser"/>
+    <addaction name="ChangeTokenAction"/>
     <addaction name="NewTaskAction"/>
     <addaction name="ExitAction"/>
    </widget>
@@ -152,21 +200,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="NewTaskAction"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="LoginAction">
-   <property name="icon">
-    <iconset resource="resouces.qrc">
-     <normaloff>:/res/img/addUser.png</normaloff>:/res/img/addUser.png</iconset>
-   </property>
-   <property name="text">
-    <string>Логин</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+L</string>
-   </property>
-  </action>
   <action name="NewTaskAction">
    <property name="icon">
     <iconset resource="resouces.qrc">
@@ -189,6 +224,24 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="AddUser">
+   <property name="icon">
+    <iconset resource="resouces.qrc">
+     <normaloff>:/res/img/addUser2.png</normaloff>:/res/img/addUser2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Добавить пользователя</string>
+   </property>
+  </action>
+  <action name="ChangeTokenAction">
+   <property name="icon">
+    <iconset resource="resouces.qrc">
+     <normaloff>:/res/img/update.png</normaloff>:/res/img/update.png</iconset>
+   </property>
+   <property name="text">
+    <string>Сменить токен</string>
    </property>
   </action>
  </widget>

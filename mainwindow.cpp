@@ -1,39 +1,18 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <iostream>
-#include <string>
+#include <QApplication>
+#include <QtWidgets>
+#include <QAction>
+#include <QMessageBox>
+#include <QJsonObject>
+#include <QFile>
+
 #include <algorithm>
+#include <exception>
 
 #include "queries_to_vk.h"
-
-QVector<QPair<QString, QString>> get_groups_from_json(const QJsonDocument& document)
-{
-    QJsonObject response = (document.object())["response"].toObject();
-
-    int countGr = response["count"].toInt();
-
-    if(countGr <= 0)
-    {
-        return QVector<QPair<QString, QString>>();
-    }
-
-    QVector<QPair<QString, QString>> groups;
-    groups.reserve(countGr);
-
-    QJsonArray items = response["items"].toArray();
-
-    for(auto gr : items)
-    {
-        QJsonObject tmpGroup = gr.toObject();
-
-        groups.push_back(qMakePair(
-                         QString::number(tmpGroup["id"].toInt()),
-                         tmpGroup["name"].toString()
-                        ));
-    }
-    return groups;
-}
+#include "updatetokenwidget.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -44,6 +23,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
     vkAuth_ = new VKAuth(app_id_, this);
 
+    QFile file("users.json");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    users_ = (QJsonDocument::fromJson(file.readAll())).array();
+    file.close();
+
+    updateUsersComboBox();
+
+    bool is_empty = users_.empty();
+
+    currentUser = (is_empty) ? -1 : 0;
+
+    ui->NewTaskBtn->setVisible(!is_empty);
+    ui->NewTaskAction->setDisabled(is_empty);
+
+    ui->changeTokenBtn->setVisible(!is_empty);
+    ui->ChangeTokenAction->setDisabled(is_empty);
+
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
@@ -52,14 +48,12 @@ MainWindow::MainWindow(QWidget *parent) :
     (scrollWidget->layout())->setAlignment(Qt::AlignTop);
     ui->scrollArea->setWidget(scrollWidget);
 
-    QObject::connect(ui->LoginBtn, &QPushButton::released, ui->LoginAction, &QAction::trigger);
+    QObject::connect(ui->AddUserPB, &QPushButton::released, ui->AddUser, &QAction::trigger);
     QObject::connect(ui->ExitBtn, &QPushButton::released, ui->ExitAction, &QAction::trigger);
     QObject::connect(ui->NewTaskBtn, &QPushButton::released, ui->NewTaskAction, &QAction::trigger);
+    QObject::connect(ui->changeTokenBtn, &QPushButton::released, ui->ChangeTokenAction, &QAction::trigger);
 
     QObject::connect(vkAuth_, &VKAuth::done, this, &MainWindow::checkLogin);
-
-    ui->NewTaskBtn->hide();
-    ui->NewTaskAction->setDisabled(true);
 
     secondThread_ = new QThread(this);
     secondThread_->start();
@@ -67,86 +61,172 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    secondThread_->terminate();
+    secondThread_->quit();
+    secondThread_->wait();
     delete ui;
 }
 
 void MainWindow::on_ExitAction_triggered()
 {
-    QApplication::quit();
+    this->closeEvent(new QCloseEvent);
 }
 
 void MainWindow::on_NewTaskAction_triggered()
 {
-    AddTaskWindow addTskWin(groups_);
-    addTskWin.setModal(true);
-
-    if(!addTskWin.exec())
+    if(currentUser < 0 || currentUser >= users_.size())
     {
         return;
     }
 
-    auto groupsIndexes = addTskWin.getGroupsIndexes();
-    QStringList groups_names;
-    QStringList groups_ids;
+    AddTaskWindow addTskWin((users_.at(currentUser))["access_token"].toString(),
+            QString::number((users_.at(currentUser))["id"].toInt()));
+    addTskWin.setModal(true);
 
-    groups_names.reserve(groupsIndexes.size());
-    groups_ids.reserve(groupsIndexes.size());
-
-    for(auto index : groupsIndexes)
+    if(!addTskWin.exec())
     {
-        const auto& group = groups_.at(index);
-        groups_names.push_back(group.second);
-        groups_ids.push_back(group.first);
+        qCritical() << "Failed to add a new task!";
+        QMessageBox::critical(this,
+                              tr("Ошибка"),
+                              tr("Ошибка добавления задачи!"));
+        return;
     }
 
-    Task* curr_task = new Task(vkAuth_->get_access_token(),
-                               groups_ids,
+    auto access_token = ((users_.at(currentUser))["access_token"]).toString();
+    Task* curr_task = new Task(access_token,
+                               addTskWin.getGroups(),
                                addTskWin.getMessage(),
                                addTskWin.getInterval(),
                                addTskWin.getPeriod());
 
-    TaskWidget* widget = new TaskWidget(curr_task, groups_names);
+    QObject::connect(this, &MainWindow::startTask,
+                     curr_task, &Task::go);
 
-    (((ui->scrollArea)->widget())->layout())->addWidget(widget);
+    if(addTskWin.hasImage())
+    {
+        if(!curr_task->attachPhoto(addTskWin.getImgPath()))
+        {
+            qWarning() << "Failed to attach image!";
+            QMessageBox::warning(this, tr("Ошибка"),
+                                 tr("Не удалось добавить изображение!"));
+        }
+    }
+
+    (((ui->scrollArea)->widget())->layout())
+            ->addWidget(new TaskWidget(curr_task));
 
     curr_task->moveToThread(secondThread_);
-}
-
-void MainWindow::on_LoginAction_triggered()
-{
-    ui->LoginAction->setDisabled(true);
-    ui->LoginBtn->setDisabled(true);
-    vkAuth_->auth(scope_);
+    emit startTask();
 }
 
 void MainWindow::checkLogin(bool success)
 {
     if(!success)
     {
-        ui->LoginAction->setEnabled(true);
-        ui->LoginBtn->setEnabled(true);
-        QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
+        qCritical() << "Failed to log in!";
+        QMessageBox::critical(this,
+                              tr("Ошибка"),
+                              tr("Не удалось авторизоваться ¯\\_(ツ)_/¯"));
         return;
     }
-    ui->LoginBtn->hide();
 
+    addNewUser(vkAuth_->get_user_id(), vkAuth_->get_access_token());
     ui->NewTaskBtn->show();
     ui->NewTaskAction->setEnabled(true);
+    ui->changeTokenBtn->show();
+    ui->ChangeTokenAction->setEnabled(true);
+}
 
-    groups_ = get_groups_from_json(vk_query::groups_get(vkAuth_->get_access_token(), vkAuth_->get_user_id()));
+void MainWindow::on_AddUser_triggered()
+{
+    vkAuth_->reauth(scope_);
+}
 
-#ifdef DEBUG
-    qDebug() << "\n\n===================================Groups list=====================================";
-    std::transform(std::cbegin(groups_), std::cend(groups_), std::ostream_iterator<std::string>(std::cout, "\n"), [](const QPair<QString, QString>& p)
+void MainWindow::on_ChangeUserCB_currentIndexChanged(int index)
+{
+    currentUser = index;
+}
+
+QString MainWindow::userNameFromJson(const QJsonDocument& doc) const
+{
+    QJsonArray arr = doc["response"].toArray();
+    if(arr.empty())
     {
-         QString result;
-         result.push_back("Id of group: ");
-         result.push_back(p.first);
-         result.push_back("\nName of group: ");
-         result.push_back(p.second);
-         return result.toStdString();
+        return QString();
+    }
+
+    QJsonObject usr = (arr.first()).toObject();
+
+    return (((usr["first_name"]).toString())
+            .append(" "))
+            .append(usr["last_name"].toString());
+}
+
+void MainWindow::addNewUser(const QString& id, const QString& access_token)
+{
+    QJsonObject usr;
+    usr["access_token"] = access_token;
+    usr["id"] = id.toInt();
+
+    try
+    {
+        usr["name"] = userNameFromJson(
+                    VkQuery::getUserName(vkAuth_->get_user_id(),
+                                         vkAuth_->get_access_token()));
+    }
+    catch (const std::exception& e)
+    {
+        usr["name"] = id;
+        qWarning() << "Failed to load name of user error: " << e.what();
+    }
+
+    users_.append(usr);
+    updateUsersComboBox();
+}
+
+void MainWindow::updateUsersComboBox()
+{
+    ui->ChangeUserCB->clear();
+    std::for_each(users_.constBegin(), users_.constEnd(),
+    [this](auto item)
+    {
+        ui->ChangeUserCB->addItem((item["name"]).toString());
     });
-    qDebug() << "===================================End of list=====================================";
-#endif
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    QFile file("users.json");
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qWarning() << "Failed to save users.json file!";
+        QMessageBox::warning(this,
+                              tr("Предупреждение"),
+                              tr("Не удалось записать пользователя в файл users.json"));
+        return;
+    }
+    file.write(QJsonDocument(users_).toJson());
+    file.close();
+    QApplication::quit();
+}
+
+void MainWindow::on_ChangeTokenAction_triggered()
+{
+    if(currentUser < 0 || currentUser >= users_.size())
+    {
+        return;
+    }
+
+    UpdateTokenWidget updateTWin;
+
+    if(updateTWin.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    QJsonObject tmp_user = (users_.at(currentUser)).toObject();
+    tmp_user["access_token"] = updateTWin.getToken();
+    users_[currentUser] = tmp_user;
+    QMessageBox::information(this,
+                             tr("Успех"),
+                             tr("Вы успешно сменили токен!"));
 }

@@ -1,6 +1,8 @@
 #include "taskwidget.h"
 
-TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* parent) : QWidget(parent)
+#include <QStandardItem>
+
+TaskWidget::TaskWidget(Task* task, QWidget* parent) : QWidget(parent)
 {
     this->setMinimumHeight(210);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
@@ -18,9 +20,9 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
 
     grChModel_ = new QStandardItemModel(this);
 
-    for(const auto& group : groups_list)
+    for(const auto& group : task->getGroups())
     {
-        QStandardItem* tmp = new QStandardItem(group);
+        QStandardItem* tmp = new QStandardItem(group.second);
         tmp->setEditable(false);
         grChModel_->appendRow(tmp);
     }
@@ -43,16 +45,16 @@ TaskWidget::TaskWidget(Task* task, const QStringList& groups_list, QWidget* pare
 
     QVBoxLayout* _layout3 = new QVBoxLayout;
 
-    _layout3->addWidget(new QLabel("<b>Задержка(в мс):</b>"));
+    _layout3->addWidget(new QLabel("<b>Задержка(в сек):</b>"));
     intervalSB_ = new QSpinBox;
-    intervalSB_->setRange(0, 10000000);
+    intervalSB_->setRange(1, 10000000);
     intervalSB_->setValue(task->getInterval());
-    intervalSB_->setSuffix(" мс.");
+    intervalSB_->setSuffix(" сек.");
     intervalSB_->setReadOnly(true);
     _layout3->addWidget(intervalSB_);
     _layout3->addWidget(new QLabel("<b>Период(в сек):</b>"));
     periodSB_ = new QSpinBox;
-    periodSB_->setRange(0, 10000000);
+    periodSB_->setRange(1, 10000000);
     periodSB_->setValue(task->getPeriod());
     periodSB_->setSuffix(" сек.");
     periodSB_->setReadOnly(true);

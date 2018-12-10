@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = QtBot
 TEMPLATE = app
 
-CONFIG += console
+#CONFIG += console
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -32,7 +32,8 @@ SOURCES += \
     task.cpp \
     taskwidget.cpp \
     vkauth.cpp \
-    queries_to_vk.cpp
+    queries_to_vk.cpp \
+    updatetokenwidget.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,7 +41,8 @@ HEADERS += \
     task.h \
     taskwidget.h \
     vkauth.h \
-    queries_to_vk.h
+    queries_to_vk.h \
+    updatetokenwidget.h
 
 FORMS += \
         mainwindow.ui \

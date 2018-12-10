@@ -2,23 +2,39 @@
 #ifndef QUERIES_TO_VK_H
 #define QUERIES_TO_VK_H
 
-#include <QObject>
-#include <QNetworkAccessManager>
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QUrl>
-#include <QUrlQuery>
+#include <QString>
+#include <QNetworkRequest>
+#include <QHttpMultiPart>
 #include <QJsonDocument>
-#include <QTimer>
 
 #define DEBUG
 
-namespace vk_query
+namespace VkQuery
 {
-    QJsonDocument get_request(const QNetworkRequest& request, int remaining_time = 10000);
-    QJsonDocument groups_get(const QString& access_token, const QString& user_id, int wait_time = 10000);
-    QJsonDocument messages_send_to_user(const QString& access_token, const QString& user_id, const QString& message, int wait_time = 10000);
-    QJsonDocument messages_send_to_group(const QString& access_token, const QString& group_id, const QString& message, int wait_time = 10000);
+    QJsonDocument getRequest(const QNetworkRequest& request, int remaining_time = 10000);
+    QJsonDocument postRequest(const QNetworkRequest& request, QHttpMultiPart* mul_part, int remaining_time = 10000);
+
+    QJsonDocument getUserName(const QString& user_id, const QString& access_token);
+    QJsonDocument groupsGet(const QString& access_token, const QString& user_id);
+
+    QJsonDocument wallPostToGroup(const QString& access_token,
+                                  const QString& group_id,
+                                  const QString& message);
+
+    QJsonDocument wallPostToGroup(const QString& access_token,
+                                  const QString& group_id,
+                                  const QString& message,
+                                  const QString& attachments);
+
+    QJsonDocument photosGetWallUploadServer(const QString& access_token, const QString& group_id);
+
+    QJsonDocument photosSaveWallPhoto(const QString& access_token,
+                                      const QString& group_id,
+                                      const QString& server,
+                                      const QString& photo,
+                                      const QString& hash);
+
+    void checkForErrors(const QJsonDocument& doc, const QString& name_func);
 }
 
 #endif // QUERIES_TO_VK_H

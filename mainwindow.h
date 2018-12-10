@@ -3,8 +3,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QWebEngineView>
-#include <QMessageBox>
+#include <QString>
+#include <QThread>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QCloseEvent>
 
 #include "addtaskwindow.h"
 #include "task.h"
@@ -20,24 +23,36 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget* parent = nullptr);
-    ~MainWindow();
+    virtual ~MainWindow() override;
+
+signals:
+    void startTask();
 
 private slots:
     void on_ExitAction_triggered();
-
     void on_NewTaskAction_triggered();
-
-    void on_LoginAction_triggered();
-
     void checkLogin(bool success);
+    void on_AddUser_triggered();
+    void on_ChangeUserCB_currentIndexChanged(int index);
+    void on_ChangeTokenAction_triggered();
 
 private:
-    Ui::MainWindow *ui;
-    VKAuth* vkAuth_;
+    QString userNameFromJson(const QJsonDocument& doc) const;
+    void addNewUser(const QString& id, const QString& access_token);
+    void updateUsersComboBox();
+    virtual void closeEvent(QCloseEvent* event) override;
+
+private:
+    Ui::MainWindow *ui{nullptr};
+    VKAuth* vkAuth_{nullptr};
+    int currentUser{};
+    QThread* secondThread_{nullptr};
     const QString app_id_{"6667132"};
-    const QString scope_{"270336"}; //   331776   266240
-    QVector<QPair<QString, QString>> groups_;
-    QThread* secondThread_;
+    const QString scope_{"335876"}; // +4(photos)
+                                    // +8192(wall)
+                                    // +65536(offline)
+                                    // +262144(groups) = 335876
+    QJsonArray users_;
 };
 
 #endif // MAINWINDOW_H
