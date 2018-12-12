@@ -49,6 +49,7 @@ private:
     QString accessToken_;
     QString message_;
     std::unique_ptr<QByteArray> photoAttachment_;
+    QString photoPath_;
     std::vector<std::pair<QString, QString>> groups_;
 };
 

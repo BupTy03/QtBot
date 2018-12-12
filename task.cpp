@@ -3,6 +3,7 @@
 #include <QHttpMultiPart>
 #include <QHttpPart>
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 
 #include <stdexcept>
@@ -43,6 +44,7 @@ bool Task::attachPhoto(const QString& img_path)
         return false;
     }
 
+    photoPath_ = img_path;
     photoAttachment_ = std::make_unique<QByteArray>(file.readAll());
     file.close();
 
@@ -86,10 +88,11 @@ std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id)
     auto multiPart = std::make_unique<QHttpMultiPart>(QHttpMultiPart::FormDataType);
 
     QHttpPart imagePart;
+    QString ext = QFileInfo(photoPath_).suffix();
     imagePart.setHeader(QNetworkRequest::ContentTypeHeader,
-                        QVariant("image/jpg"));
+                        QVariant(QString("image/") + ext));
     imagePart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                        QVariant("multipart/form-data; name=\"photo\"; filename=\"image.jpg\""));
+                        QVariant(QString("multipart/form-data; name=\"photo\"; filename=\"imagefile.") + ext + QString("\"")));
     imagePart.setRawHeader("Content-Transfer-Encoding", "binary");
     imagePart.setBody(*photoAttachment_);
 

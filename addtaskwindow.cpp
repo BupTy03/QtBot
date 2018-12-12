@@ -225,7 +225,7 @@ void AddTaskWindow::on_loadImageBtn_clicked()
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Загрузить изображение"),
                                                     QDir::currentPath(),
-                                                    tr("Images (*.jpg)"));
+                                                    tr("Image Files (*.jpg *.png *.bmp)"));
     if(!loadImg_.load(filename))
     {
         qWarning() << "Failed to open the image!";
