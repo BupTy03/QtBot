@@ -87,7 +87,7 @@ QJsonDocument VkQuery::groupsGet(const QString& access_token, const QString& use
     query.addQueryItem("fields", "name");
     query.addQueryItem("access_token", access_token);
     query.addQueryItem("test_mode", "1");
-    query.addQueryItem("v", "5.52");
+    query.addQueryItem("v", "5.92");
 #ifdef DEBUG
     qDebug() << "Query:" << query.toString();
 #endif
@@ -110,7 +110,7 @@ QJsonDocument VkQuery::getUserName(const QString& user_id, const QString& access
     QUrlQuery query(request);
     query.addQueryItem("user_id", user_id);
     query.addQueryItem("access_token", access_token);
-    query.addQueryItem("v", "5.52");
+    query.addQueryItem("v", "5.92");
 
     request.setQuery(query);
 
@@ -136,7 +136,7 @@ QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QStrin
     query.addQueryItem("message", message);
     query.addQueryItem("access_token", access_token);
     query.addQueryItem("test_mode", "1");
-    query.addQueryItem("v", "5.52");
+    query.addQueryItem("v", "5.92");
 
     request.setQuery(query);
 
@@ -163,7 +163,7 @@ QJsonDocument VkQuery::wallPostToGroup(const QString& access_token, const QStrin
     query.addQueryItem("attachments", attachments);
     query.addQueryItem("access_token", access_token);
     query.addQueryItem("test_mode", "1");
-    query.addQueryItem("v", "5.52");
+    query.addQueryItem("v", "5.92");
 
     request.setQuery(query);
 
@@ -186,7 +186,7 @@ QJsonDocument VkQuery::photosGetWallUploadServer(const QString& access_token, co
     QUrlQuery query(request);
     query.addQueryItem("access_token", access_token);
     query.addQueryItem("group_id", group_id);
-    query.addQueryItem("v", "5.52");
+    query.addQueryItem("v", "5.92");
 
     request.setQuery(query);
 
@@ -213,7 +213,7 @@ QJsonDocument VkQuery::photosSaveWallPhoto(const QString& access_token, const QS
     query.addQueryItem("photo", photo);
     query.addQueryItem("server", server);
     query.addQueryItem("hash", hash);
-    query.addQueryItem("v", "5.52");
+    query.addQueryItem("v", "5.92");
 
     request.setQuery(query);
 

@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#define DEBUG
+//#define DEBUG
 
 class VKAuth : public QObject
 {

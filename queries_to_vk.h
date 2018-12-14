@@ -7,7 +7,7 @@
 #include <QHttpMultiPart>
 #include <QJsonDocument>
 
-#define DEBUG
+//#define DEBUG
 
 namespace VkQuery
 {
