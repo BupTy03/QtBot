@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     vkAuth_ = new VKAuth(app_id_, this);
 
-    QFile file("users.json");
+    QFile file(QApplication::applicationDirPath() + "/users.json");
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     users_ = (QJsonDocument::fromJson(file.readAll())).array();
     file.close();
@@ -78,8 +78,8 @@ void MainWindow::on_NewTaskAction_triggered()
         return;
     }
 
-    AddTaskWindow addTskWin((users_.at(currentUser))["access_token"].toString(),
-            QString::number((users_.at(currentUser))["id"].toInt()));
+    AddTaskWindow addTskWin((((users_.at(currentUser)).toObject()).take("access_token")).toString(),
+            QString::number((((users_.at(currentUser)).toObject()).take("id")).toInt()));
     addTskWin.setModal(true);
 
     if(!addTskWin.exec())
@@ -91,7 +91,7 @@ void MainWindow::on_NewTaskAction_triggered()
         return;
     }
 
-    auto access_token = ((users_.at(currentUser))["access_token"]).toString();
+    auto access_token = (((users_.at(currentUser)).toObject()).take("access_token")).toString();
     Task* curr_task = new Task(access_token,
                                addTskWin.getGroups(),
                                addTskWin.getMessage(),
@@ -148,7 +148,7 @@ void MainWindow::on_ChangeUserCB_currentIndexChanged(int index)
 
 QString MainWindow::userNameFromJson(const QJsonDocument& doc) const
 {
-    QJsonArray arr = doc["response"].toArray();
+    QJsonArray arr = (doc.object())["response"].toArray();
     if(arr.empty())
     {
         return QString();
@@ -156,7 +156,7 @@ QString MainWindow::userNameFromJson(const QJsonDocument& doc) const
 
     QJsonObject usr = (arr.first()).toObject();
 
-    return (((usr["first_name"]).toString())
+    return ((usr["first_name"].toString())
             .append(" "))
             .append(usr["last_name"].toString());
 }
@@ -189,13 +189,13 @@ void MainWindow::updateUsersComboBox()
     std::for_each(users_.constBegin(), users_.constEnd(),
     [this](auto item)
     {
-        ui->ChangeUserCB->addItem((item["name"]).toString());
+        ui->ChangeUserCB->addItem((item.toObject())["name"].toString());
     });
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    QFile file("users.json");
+    QFile file(QApplication::applicationDirPath() + "/users.json");
     if(!file.open(QIODevice::WriteOnly))
     {
         qWarning() << "Failed to save users.json file!";

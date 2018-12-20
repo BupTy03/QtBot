@@ -44,7 +44,7 @@ AddTaskWindow::AddTaskWindow(const QString& access_token, const QString& user_id
     if(!userGroups_ || userGroups_->empty())
     {
         QMessageBox::warning(this, tr("Предупреждение"),
-                             tr("Не удалось загузить список сообществ пользователя"));
+                             tr("Не удалось загрузить список сообществ пользователя"));
         ui->radioBtnList->setVisible(false);
         ui->radioBtnFile->toggle();
         return;
@@ -95,7 +95,7 @@ std::vector<std::pair<QString, QString>> AddTaskWindow::getGroups() const
     {
         if((groupsModel_->item(i, 0))->checkState() == Qt::Checked)
         {
-            const auto& group = (*currentList_).at(i);
+            auto group = (currentList_->at(i)).toObject();
             result.emplace_back(QString::number(group["id"].toInt()),
                                 group["name"].toString());
         }
@@ -160,7 +160,7 @@ void AddTaskWindow::updateItems()
     this->groupsModel_->clear();
     std::for_each(std::cbegin(*currentList_), std::cend(*currentList_), [this](const auto& group)
     {
-        QStandardItem* tmp = new QStandardItem(group["name"].toString());
+        QStandardItem* tmp = new QStandardItem((group.toObject())["name"].toString());
         tmp->setCheckable(true);
         tmp->setEditable(false);
         this->groupsModel_->appendRow(tmp);
@@ -182,7 +182,7 @@ bool AddTaskWindow::areAllItemsUnchecked()
 
 std::shared_ptr<QJsonArray> AddTaskWindow::getGroupsFromJson(const QJsonDocument& document) const
 {
-    QJsonArray array = ((document["response"])["items"]).toArray();
+    QJsonArray array = (((document.object())["response"]).toObject())["items"].toArray();
 
     if(array.empty())
     {

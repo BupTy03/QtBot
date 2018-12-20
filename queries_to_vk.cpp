@@ -237,7 +237,7 @@ void VkQuery::checkForErrors(const QJsonDocument& doc, const QString& name_func)
         throw std::runtime_error(error_str.toStdString());
     }
 
-    QJsonObject error = doc["error"].toObject();
+    QJsonObject error = (doc.object())["error"].toObject();
     if(error.isEmpty())
     {
         return;

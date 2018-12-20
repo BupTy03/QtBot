@@ -35,7 +35,7 @@ void messageHandler(QtMsgType type,
     QMutex _mutex;
     QMutexLocker _locker(&_mutex);
 
-    std::unique_ptr<QFile, std::function<void(QFile*)>> logfile(new QFile("log.txt"),
+    std::unique_ptr<QFile, std::function<void(QFile*)>> logfile(new QFile(QApplication::applicationDirPath() + "/log.txt"),
     [](QFile* ptr_f)
     {
         if(ptr_f->isOpen())
@@ -51,7 +51,7 @@ void messageHandler(QtMsgType type,
     }
 
     QTextStream out(logfile.get());
-    out << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz ");
+    out << (QDateTime::currentDateTime()).toString("yyyy-MM-dd hh:mm:ss.zzz ");
     switch (type)
     {
     case QtInfoMsg:     out << "INFO "; break;

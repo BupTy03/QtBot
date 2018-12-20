@@ -78,10 +78,10 @@ void Task::postToWall(const QString& group_id) const
 
 std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id) const
 {
-    QJsonDocument doc_server =
-            VkQuery::photosGetWallUploadServer(accessToken_, group_id);
+    QJsonObject doc_server =
+            (VkQuery::photosGetWallUploadServer(accessToken_, group_id)).object();
 
-    QUrl server_url(((doc_server["response"])["upload_url"]).toString());
+    QUrl server_url(((doc_server.take("response")).toObject())["upload_url"].toString());
 
     auto multiPart = std::make_unique<QHttpMultiPart>(QHttpMultiPart::FormDataType);
 
@@ -95,8 +95,8 @@ std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id)
 
     multiPart->append(imagePart);
 
-    QJsonDocument upload_result =
-            VkQuery::postRequest(QNetworkRequest(server_url), multiPart.get());
+    QJsonObject upload_result =
+            (VkQuery::postRequest(QNetworkRequest(server_url), multiPart.get())).object();
 
     QString server = QString::number(upload_result["server"].toInt());
     QString photo = upload_result["photo"].toString();
@@ -111,12 +111,12 @@ std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id)
 QString Task::savePhoto(const QString& group_id,
                      const std::tuple<QString, QString, QString>& photoDetails) const
 {
-    QJsonDocument save_answer =
-            VkQuery::photosSaveWallPhoto(accessToken_, group_id,
+    QJsonObject save_answer =
+            (VkQuery::photosSaveWallPhoto(accessToken_, group_id,
                                                     std::get<0>(photoDetails), // server
                                                     std::get<1>(photoDetails), // photo
                                                     std::get<2>(photoDetails)  // hash
-                                                    );
+                                                    )).object();
 
     QJsonArray response_arr = save_answer["response"].toArray();
     if(response_arr.isEmpty())
