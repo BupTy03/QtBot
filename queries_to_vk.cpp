@@ -24,9 +24,9 @@ QJsonDocument VkQuery::getRequest(const QNetworkRequest& request, int remaining_
         throw std::runtime_error{"in function VkQuery::getRequest(): invalid url"};
     }
 
-    auto manager = std::make_unique<QNetworkAccessManager>();
-    auto loop = std::make_unique<QEventLoop>();
-    auto timer = std::make_unique<QTimer>();
+    std::unique_ptr<QNetworkAccessManager> manager(new QNetworkAccessManager);
+    std::unique_ptr<QEventLoop> loop(new QEventLoop);
+    std::unique_ptr<QTimer> timer(new QTimer);
 
     QObject::connect(manager.get(), &QNetworkAccessManager::finished, loop.get(), &QEventLoop::quit);
     QObject::connect(timer.get(), &QTimer::timeout, loop.get(), &QEventLoop::quit);
@@ -52,9 +52,9 @@ QJsonDocument VkQuery::postRequest(const QNetworkRequest& request, QHttpMultiPar
         throw std::runtime_error{"in function VkQuery::postRequest(): invalid url"};
     }
 
-    auto manager = std::make_unique<QNetworkAccessManager>();
-    auto loop = std::make_unique<QEventLoop>();
-    auto timer = std::make_unique<QTimer>();
+    std::unique_ptr<QNetworkAccessManager> manager(new QNetworkAccessManager);
+    std::unique_ptr<QEventLoop> loop(new QEventLoop);
+    std::unique_ptr<QTimer> timer(new QTimer);
 
     QObject::connect(manager.get(), &QNetworkAccessManager::finished, loop.get(), &QEventLoop::quit);
     QObject::connect(timer.get(), &QTimer::timeout, loop.get(), &QEventLoop::quit);

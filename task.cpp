@@ -43,7 +43,7 @@ bool Task::attachPhoto(const QString& img_path)
         return false;
     }
 
-    photoAttachment_ = std::make_unique<QByteArray>(file.readAll());
+    photoAttachment_.reset(new QByteArray(file.readAll()));
     file.close();
 
     return true;
@@ -83,7 +83,7 @@ std::tuple<QString, QString, QString> Task::uploadPhoto(const QString& group_id)
 
     QUrl server_url(((doc_server.take("response")).toObject())["upload_url"].toString());
 
-    auto multiPart = std::make_unique<QHttpMultiPart>(QHttpMultiPart::FormDataType);
+    std::unique_ptr<QHttpMultiPart> multiPart(new QHttpMultiPart(QHttpMultiPart::FormDataType));
 
     QHttpPart imagePart;
     imagePart.setHeader(QNetworkRequest::ContentTypeHeader,

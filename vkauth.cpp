@@ -5,7 +5,7 @@
 
 VKAuth::VKAuth(QString appID, QObject* parent)
     : QObject(parent),
-      browser_(std::make_unique<QWebEngineView>()),
+      browser_(new QWebEngineView),
       appID_(std::move(appID))
 {
     QObject::connect(browser_.get(), &QWebEngineView::urlChanged, this, &VKAuth::checkAuth);

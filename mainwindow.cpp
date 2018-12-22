@@ -187,7 +187,7 @@ void MainWindow::updateUsersComboBox()
 {
     ui->ChangeUserCB->clear();
     std::for_each(users_.constBegin(), users_.constEnd(),
-    [this](auto item)
+    [this](const QJsonValue& item)
     {
         ui->ChangeUserCB->addItem((item.toObject())["name"].toString());
     });

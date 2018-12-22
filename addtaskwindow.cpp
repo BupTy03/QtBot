@@ -158,7 +158,7 @@ void AddTaskWindow::updateItems()
     }
 
     this->groupsModel_->clear();
-    std::for_each(std::cbegin(*currentList_), std::cend(*currentList_), [this](const auto& group)
+    std::for_each(currentList_->constBegin(), currentList_->constEnd(), [this](const QJsonValue& group)
     {
         QStandardItem* tmp = new QStandardItem((group.toObject())["name"].toString());
         tmp->setCheckable(true);
